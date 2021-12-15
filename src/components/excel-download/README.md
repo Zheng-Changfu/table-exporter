@@ -2,361 +2,199 @@
 
 > 使用前端 **table** 结构, 导出 **excel** 结构
 
-## 1. 快速上手
+## 1. 导出正常表格到Excel
 
+![](../../assets/导出正常表格-1.png) 
 
-
-## 1. 导出正常表格案例
-
-![](../../导出正常表格.gif) 
+![](../../assets/导出正常表格-2.png)   
 
 ```js
-# coding
-import { STableExporter } from 'STableExporter'
-const exportInstance = new STableExporter({
-      progress: this.progress, // 导出进度
-      tables: [table] // table具体配置看下方代码
-    });
-await exportInstance.init(); // 初始化需要导出的数据
-exportInstance.export(); // 需要导出的数据进行整合
-exportInstance.download('导出正常表格案例'); // 导出excel
-
-# table配置
-一个 table 为一个 sheet,如果要导出多个 sheet，传递多个 table 即可
-{	
-    // 默认导出后的表格sheet名称，默认是 sheet + 索引
-    "sheetName":"sheet",
-    // 表格头部 -> excel头部
-    "headerData": {
-        // 必填---单元格信息
-        "cells": [
-            {
-                // row/col/rowspan/colspan用来确定一个单元格位置
-                "row": 0,
-                "col": 0,
-                "rowspan": 1,
-                "colspan": 1,
-                
-                // 单元格文本内容
-                "text": "日期",
-                // 单元格样式,更多样式请参考 exceljs
-                "style": {
-                    "bold": true // 字体加粗
-                }
-            },
-        ],
-        // 选填---列样式,具体参数请参考 exceljs
-        "columnStyle": [
-            {
-                "width": 20 // 列宽度
-            },
-        ],
-        // 选填---行样式,具体参数请参考 exceljs
-        "rowStyle": [
-            {
-                "height": 20 // 行高
-            }
-        ],
-        // 必填---所有的行长度(row + rowspan)
-        "rowLength": 1
-    },
-    // 表格身体 ---> excel内容区(同上)
-    "mainData": {
-        "cells": [
-            {
-                "row": 0,
-                "col": 0,
-                "rowspan": 1,
-                "colspan": 1,
-                "text": "2016-05-02"
-            },
-        ],
-        "rowStyle": [
-            {
-                "height": 20
-            },
-        ],
-        "rowLength": 4
-    },
-    // 针对当前excel-sheet的配置,更多配置请参考 exceljs
-    "options": {
-        // 设置第一行冻结(固定行)
-        "views": [
-            {
-                "state": "frozen",
-                "xSplit": 0,
-                "ySplit": 1 
-            }
-        ]
-    }
-} 
-```
-
-### 完整示例代码
-
-```js
-# coding
-// 导出功能.vue文件
- handleExport() {
-      const control = new Control({
-        data: this.tableData,
-        progress: this.handlePercentage,
-      });
-      control.export();
- }
-
-// .js文件
-import { STableExporter } from '../../components/excel-download'
-import { mapCreateTable } from '../../components/table-helpers/helpers'
-import { createArray } from '../../components/excel-download/util'
-export default class Control {
-  constructor(options) {
-    this.progress = options.progress
-    this.data = options.data
-  }
-  export () {
-    const headerData = this.handleExcelHeader()
-    const mainData = this.handleExcelMain()
-    const table = {
-      headerData,
-      mainData,
-      // excel表格配置(非必填)
-      options: {
-        views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }] // 冻结第一行
-      }
-    }
-    console.log(table, 'table')
-    this.download(table)
-  }
-  handleExcelHeader () {
-    // 可以写死列配置，如果是动态列配置，请用辅助函数
-    const cells = [
-      { row: 0, col: 0, rowspan: 1, colspan: 1, text: '日期', style: { bold: true } }, // excel单元格样式
-      { row: 0, col: 1, rowspan: 1, colspan: 1, text: '姓名', style: { bold: true } },
-      { row: 0, col: 2, rowspan: 1, colspan: 1, text: '地址', style: { bold: true } },
-    ]
-    // excel列样式(非必填))
-    const columnStyle = createArray(cells.length, (index) => {
-      return index === cells.length - 1 ? { width: 40 } : { width: 20 }
-    })
-    // excel行样式(非必填)
-    const rowStyle = [{ height: 20 }]
-    // 总共有多少行(row + rowspan)
-    const rowLength = 1
-    return {
-      cells,
-      columnStyle,
-      rowStyle,
-      rowLength,
-    }
-  }
-
-  handleExcelMain () {
-    const defaultRow = { date: '日期', name: '姓名', address: '地址' };
-    const columnList = Object.keys(defaultRow)
-    const {
-      mergeCells,
-      excel: {
-        rowStyle
-      },
-      data
-    } = mapCreateTable({
-      data: {
-        rowList: this.data,
-        columnList
-      },
-      mapCreateColumn: ({ columnLen }) => {
-        return createArray(columnLen, index => {
-          return {
-            field: `${index}-field`,
-          }
-        })
-      },
-      mapCreateData: ({ row, column, columnIndex }) => {
-        const key = `${columnIndex}-field`
-        const value = row[column]
-        return {
-          key,
-          value,
-          excel: {
-            text: value,
-            height: 20
-          }
-        }
-      }
-    })
-
-    return {
-      cells: mergeCells,
-      rowStyle,
-      rowLength: data.length
-    }
-  }
-
-  async download (table) {
-    const exportInstance = new STableExporter({
-      progress: this.progress,
-      tables: [table]
-    });
-    await exportInstance.init();
-    exportInstance.export();
-    exportInstance.download('导出正常表格案例');
-  }
+# code
+// 点击导出触发的函数
+handleExport() {
+      const instance = new ElMapExportTable(
+        { column, data },
+        { progress: val => this.handlePercentage(val) }// 进度条回调 
+      );
+      instance.download("导出正常表格案例");
 }
 
+# column
+const column = [
+        { title: "日期", dataIndex: "date" }, // title为excel列名称,dataIndex为当前列对应的数据源字段
+        { title: "姓名", dataIndex: "name" },
+        { title: "地址", dataIndex: "address" },
+];
+
+# data
+const data = [
+    	{
+          date: "2016-05-02",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1518 弄",
+        },
+        {
+          date: "2016-05-04",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1517 弄",
+        },
+        {
+          date: "2016-05-01",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1519 弄",
+        },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1516 弄",
+        },
+]
 ```
 
-## 2. 导出合并单元格的表格案例
+## 2. 导出表头合并到Excel
 
-![](../../导出合并单元格.gif)   
+![](../../assets/导出表头合并表格-1.png) 
 
-### 完整实例代码
+![](../../assets/导出表头合并表格-2.png) 
 
 ```js
-# coding
-// 导出功能.vue文件
- handleExport() {
-      const control = new Control({
-        data: this.tableData,
-        progress: this.handlePercentage,
-      });
-      control.export();
- }
-
-// .js文件
-import { STableExporter } from '../../components/excel-download'
-import { mapCreateTable, mapCreateMergeHeaderTable } from '../../components/table-helpers/helpers'
-import { createArray } from '../../components/excel-download/util'
-export default class Control {
-  constructor(options) {
-    this.progress = options.progress
-    this.data = options.data
-  }
-  export () {
-    const headerData = this.handleExcelHeader()
-    const mainData = this.handleExcelMain()
-    const table = {
-      headerData,
-      mainData,
-      // excel表格配置(非必填)
-      options: {
-        views: [{ state: 'frozen', xSplit: 0, ySplit: 3 }] // 冻结前3行
-      }
-    }
-    this.download(table)
-  }
-  handleExcelHeader () {
-    // 如果想导出复杂表格,将数据整理成树形结构，交给辅助函数即可
-    const treeData = [
-      { name: '日期' },
-      {
-        name: '配送信息', children: [
-          { name: '姓名' },
-          {
-            name: '地址', children: [
-              { name: '省份' },
-              { name: '市区' },
-              { name: '地址' },
-              { name: '邮编' }
-            ]
-          }
-        ]
-      }
-    ]
-    const result = mapCreateMergeHeaderTable({
-      data: treeData,
-      mapCreateColumn: ({ columnLen }) => {
-        return createArray(columnLen, index => {
-          return {
-            field: `${index}-field`,
-            excel: {
-              width: index === 4 ? 30 : 20
-            }
-          }
-        })
-      },
-      mapCreateData: ({ data, columnIndex }) => {
-        const key = `${columnIndex}-field`
-        const value = data.name
-        return {
-          key,
-          value,
-          excel: {
-            text: value,
-            font: {
-              bold: true // 字体加粗
-            },
-            height: 20
-          }
-        }
-      }
-    })
-    const { mergeCells, data, excel: { rowStyle, columnStyle } } = result
-    return {
-      cells: mergeCells,
-      rowLength: data.length,
-      rowStyle,
-      columnStyle
-    }
-  }
-
-  handleExcelMain () {
-    const columnList = ['date', 'name', 'province', 'city', 'address', 'zip']
-    const {
-      mergeCells,
-      excel: {
-        rowStyle
-      },
-      data
-    } = mapCreateTable({
-      data: {
-        rowList: this.data,
-        columnList
-      },
-      mapCreateColumn: ({ columnLen }) => {
-        return createArray(columnLen, index => {
-          return {
-            field: `${index}-field`,
-          }
-        })
-      },
-      mapCreateData: ({ row, column, columnIndex }) => {
-        const key = `${columnIndex}-field`
-        const value = row[column]
-        return {
-          key,
-          value,
-          excel: {
-            text: value,
-            height: 20
-          }
-        }
-      }
-    })
-
-    return {
-      cells: mergeCells,
-      rowStyle,
-      rowLength: data.length
-    }
-  }
-
-  async download (table) {
-    const exportInstance = new STableExporter({
-      progress: this.progress,
-      tables: [table]
-    });
-    await exportInstance.init();
-    exportInstance.export();
-    exportInstance.download('导出合并单元格的表格案例');
-  }
+# code
+// 点击导出触发的函数
+handleExport() {
+      const instance = new ElMapExportTable(
+        { column, data },
+        { progress: val => this.handlePercentage(val) }// 进度条回调 
+      );
+      instance.download("导出合并单元格的表格案例");
 }
 
+# column
+// 如果是合并单元格的列,设置成相应的树形结构即可
+const column = [
+    { title: "日期", dataIndex: "date" },
+    {
+        title: "配送信息",
+        children: [
+            { title: "姓名", dataIndex: "name" },
+            {
+                title: "地址",
+                children: [
+                    { title: "省份", dataIndex: "province" },
+                    { title: "市区", dataIndex: "city" },
+                    { title: "地址", dataIndex: "address" },
+                    { title: "邮编", dataIndex: "zip" },
+                ],
+            },
+        ],
+    },
+];
+
+# data
+const data = [
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-02",
+          name: "王小虎",
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-04",
+          name: "王小虎",
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-01",
+          name: "王小虎",
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-08",
+          name: "王小虎",
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-06",
+          name: "王小虎",
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-07",
+          name: "王小虎",
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+]
 ```
 
-## 3. 导出多个表格分成多个sheet案例
+## 3. 导出表体合并到Excel
 
-## 4. 导出插入表头额外数据案例
+## 4. 导出混合合并到Excel
+
+
+
+## 5. 导出图片到Excel
+
+
+
+## 6. 设置Excel的列样式
+
+
+
+## 7. 设置Excel的行样式
+
+
+
+## 8. 设置Execl的单元格样式
+
+
+
+## 9. 设置Excel单元格格式
+
+
+
+## 10. 设置Excel-Sheet样式
+
+
+
+## 11. 导出多个Sheet到Excel
+
+
+
+## 12. 临时插入Excel数据
+
+
+
+## 13. 导出表尾统计到Excel
+
+
+
+## 14. 导出大数据量表格到Excel
+
+
 
 
 

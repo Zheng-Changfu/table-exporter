@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import Control from "./calculate";
+import { ElMapExportTable } from "../../components/table-helpers/el-map-table";
 export default {
   name: "ExportTable2",
   data() {
@@ -127,11 +127,30 @@ export default {
   },
   methods: {
     handleExport() {
-      const control = new Control({
-        data: this.tableData,
-        progress: this.handlePercentage,
-      });
-      control.export();
+      // 如果是合并单元格的列,设置成相应的树形结构即可
+      const column = [
+        { title: "日期", dataIndex: "date" },
+        {
+          title: "配送信息",
+          children: [
+            { title: "姓名", dataIndex: "name" },
+            {
+              title: "地址",
+              children: [
+                { title: "省份", dataIndex: "province" },
+                { title: "市区", dataIndex: "city" },
+                { title: "地址", dataIndex: "address" },
+                { title: "邮编", dataIndex: "zip" },
+              ],
+            },
+          ],
+        },
+      ];
+      const instance = new ElMapExportTable(
+        { data: this.tableData, column },
+        { progress: this.handlePercentage }
+      );
+      instance.download("导出合并单元格的表格案例");
     },
     handlePercentage(percentage) {
       this.percentage = percentage;

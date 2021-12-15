@@ -17,7 +17,7 @@ export function eachTree (data, callback1 = noop, callback2 = noop, options = {}
     $sort:当前数据在父级中的排序
     $leafNode:是否为叶子节点
    */
-  const field = options.field ? options.field : '_child';
+  const field = options.field ? options.field : 'children';
   function fn (data, parent = null, level = 1) {
     for (let i = 0; i < data.length; i++) {
       const item = data[i]
@@ -45,4 +45,6 @@ export const createArray = (len, cb) => {
 }
 
 export const hasOwnProperty = (obj, prop) => Object.hasOwnProperty.call(obj, prop)
+
+
 

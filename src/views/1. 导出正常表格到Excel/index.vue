@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import Control from "./calculate";
+import { ElMapExportTable } from "../../components/table-helpers/el-map-table";
 export default {
   name: "ExportTable1",
   data() {
@@ -69,16 +69,16 @@ export default {
   },
   methods: {
     handleExport() {
-      const control = new Control({
-        data: this.tableData,
-        column: [
-          { title: "日期", dataIndex: "date" },
-          { title: "姓名", dataIndex: "name" },
-          { title: "地址", dataIndex: "address" },
-        ],
-        progress: this.handlePercentage,
-      });
-      control.export();
+      const column = [
+        { title: "日期", dataIndex: "date" },
+        { title: "姓名", dataIndex: "name" },
+        { title: "地址", dataIndex: "address" },
+      ];
+      const instance = new ElMapExportTable(
+        { column, data: this.tableData },
+        { progress: this.handlePercentage }
+      );
+      instance.download("导出正常表格案例");
     },
     handlePercentage(percentage) {
       this.percentage = percentage;

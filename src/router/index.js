@@ -7,34 +7,59 @@ export default new VueRouter({
   routes: [
     {
       path: '/export-table-1',
-      component: () => import('../views/1. 导出正常表格案例/index.vue'),
-      meta: {
-        desc: '1. 导出正常表格案例'
-      }
+      component: () => import('../views/1. 导出正常表格到Excel/index.vue'),
     },
     {
       path: '/export-table-2',
-      name: 'ExportTable2',
-      component: () => import('../views/2. 导出合并单元格的表格案例/index.vue'),
-      meta: {
-        desc: '2. 导出合并单元格的表格案例'
-      }
+      component: () => import('../views/2. 导出表头合并到Excel/index.vue'),
     },
     {
       path: '/export-table-3',
-      name: 'ExportTable3',
-      component: () => import('../views/3. 导出多个表格分成多个sheet案例/index.vue'),
-      meta: {
-        desc: '3. 导出多个表格分成多个sheet案例'
-      }
+      component: () => import('../views/3. 导出表体合并到Excel/index.vue'),
+    },
+    {
+      path: '/export-table-4',
+      component: () => import('../views/4. 导出混合合并到Excel/index.vue'),
     },
     {
       path: '/export-table-5',
-      name: 'ExportTable5',
-      component: () => import('../views/5. 导出插入表头额外数据案例/index.vue'),
-      meta: {
-        desc: '5. 导出插入表头额外数据案例'
-      }
+      component: () => import('../views/5. 导出图片到Excel/index.vue'),
+    },
+    {
+      path: '/export-table-6',
+      component: () => import('../views/6. 设置Excel的列样式/index.vue'),
+    },
+    {
+      path: '/export-table-7',
+      component: () => import('../views/7. 设置Excel的行样式/index.vue'),
+    },
+    {
+      path: '/export-table-8',
+      component: () => import('../views/8. 设置Execl的单元格样式/index.vue'),
+    },
+    {
+      path: '/export-table-9',
+      component: () => import('../views/9. 设置Excel单元格格式/index.vue'),
+    },
+    {
+      path: '/export-table-10',
+      component: () => import('../views/10. 设置Excel-Sheet样式/index.vue'),
+    },
+    {
+      path: '/export-table-11',
+      component: () => import('../views/11. 导出多个Sheet到Excel/index.vue'),
+    },
+    {
+      path: '/export-table-12',
+      component: () => import('../views/12 临时插入Excel数据/index.vue'),
+    },
+    {
+      path: '/export-table-13',
+      component: () => import('../views/13. 导出表尾统计到Excel/index.vue'),
+    },
+    {
+      path: '/export-table-14',
+      component: () => import('../views/14. 导出大数据量表格到Excel/index.vue'),
     },
   ]
 })

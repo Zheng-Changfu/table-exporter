@@ -140,7 +140,7 @@ class MapTable {
         }
       },
       {
-        field: 'children'
+        field
       }
     );
     //#endregion
@@ -232,9 +232,9 @@ export class MapCreateMergeHeaderTable extends MapTable {
        */
       const text = excel.text
       cell.text = text ? text : ''
-
       if (hasOwnProperty(excel, 'format')) {
         cell.numFmt = excel.format
+        // 等待处理
         cell.text = moment(text).format(excel.format.toUpperCase())
       }
     }
@@ -252,14 +252,27 @@ export class MapCreateMergeHeaderTable extends MapTable {
     if (isObject(excel)) {
       const copyStyle = { ...excel }
       // text和format单独被handleExcelText处理
-      if (hasOwnProperty(copyStyle, 'text')) {
-        delete copyStyle.text
-      }
-      if (hasOwnProperty(copyStyle, 'format')) {
-        delete copyStyle.format
+      // 单元格样式单独被handleExcelCellStyle处理
+      const dirtyFields = ['text', 'style', 'format']
+      const dirtyFieldsLen = dirtyFields.length
+      for (let i = 0; i < dirtyFieldsLen; i++) {
+        const field = dirtyFields[i]
+        if (hasOwnProperty(copyStyle, field)) {
+          delete copyStyle[field]
+        }
       }
       this.excel.rowStyle.push(copyStyle)
     }
+  }
+
+  // 处理excel单元格
+  handleExcelCell (cell, excel = {}) {
+    let style = {}
+    const userStyle = excel.style
+    if (isObject(userStyle)) {
+      style = userStyle
+    }
+    cell.style = style
   }
 
   // 辅助创建行数据
@@ -281,6 +294,7 @@ export class MapCreateMergeHeaderTable extends MapTable {
         this.handleExcelRow(excel)
       }
       this.handleExcelText(cell, excel)
+      this.handleExcelCell(cell, excel)
     }
   }
 }
@@ -344,14 +358,26 @@ export class MapCreateMergeMainTable extends MapTable {
     if (isObject(excel)) {
       const copyStyle = { ...excel }
       // text和format单独被handleExcelText处理
-      if (hasOwnProperty(copyStyle, 'text')) {
-        delete copyStyle.text
-      }
-      if (hasOwnProperty(copyStyle, 'format')) {
-        delete copyStyle.format
+      const dirtyFields = ['text', 'style', 'format']
+      const dirtyFieldsLen = dirtyFields.length
+      for (let i = 0; i < dirtyFieldsLen; i++) {
+        const field = dirtyFields[i]
+        if (hasOwnProperty(copyStyle, field)) {
+          delete copyStyle[field]
+        }
       }
       this.excel.rowStyle.push(copyStyle)
     }
+  }
+
+  // 处理excel单元格
+  handleExcelCell (cell, excel = {}) {
+    let style = {}
+    const userStyle = excel.style
+    if (isObject(userStyle)) {
+      style = userStyle
+    }
+    cell.style = style
   }
 
   mapCreateColumn () {
@@ -382,6 +408,7 @@ export class MapCreateMergeMainTable extends MapTable {
         this.handleExcelRow(excel)
       }
       this.handleExcelText(cell, excel)
+      this.handleExcelCell(cell, excel)
     }
   }
 }
@@ -457,6 +484,7 @@ export class MapCreateNoMergeTable extends MapTable {
 
       if (hasOwnProperty(excel, 'format')) {
         cell.numFmt = excel.format
+        // 等待处理
         cell.text = moment(text).format(excel.format.toUpperCase())
       }
     }
@@ -474,14 +502,26 @@ export class MapCreateNoMergeTable extends MapTable {
     if (isObject(excel)) {
       const copyStyle = { ...excel }
       // text和format单独被handleExcelText处理
-      if (hasOwnProperty(copyStyle, 'text')) {
-        delete copyStyle.text
-      }
-      if (hasOwnProperty(copyStyle, 'format')) {
-        delete copyStyle.format
+      const dirtyFields = ['text', 'style', 'format']
+      const dirtyFieldsLen = dirtyFields.length
+      for (let i = 0; i < dirtyFieldsLen; i++) {
+        const field = dirtyFields[i]
+        if (hasOwnProperty(copyStyle, field)) {
+          delete copyStyle[field]
+        }
       }
       this.excel.rowStyle.push(copyStyle)
     }
+  }
+
+  // 处理excel单元格
+  handleExcelCell (cell, excel = {}) {
+    let style = {}
+    const userStyle = excel.style
+    if (isObject(userStyle)) {
+      style = userStyle
+    }
+    cell.style = style
   }
 
   mapCreateData ({ row, rowIndex, column, columnIndex, cell }) {
@@ -495,6 +535,155 @@ export class MapCreateNoMergeTable extends MapTable {
         this.handleExcelRow(excel)
       }
       this.handleExcelText(cell, excel)
+      this.handleExcelCell(cell, excel)
+    }
+  }
+
+  mapCreateColumn () {
+    const {
+      options: {
+        data: {
+          columnList
+        }
+      }, options } = this
+    if (options.mapCreateColumn) {
+      const columns = options.mapCreateColumn({ columnLen: columnList.length })
+      this.handleExcelColumn(columns)
+      this.columns = columns
+    }
+  }
+}
+
+// 辅助创建组合(表体有的合并、有的不合并)的表格
+export class MapCreateCombinTable extends MapTable {
+  constructor(options) {
+    const {
+      startCol = 0,
+      data = { rowList: [], columnList: [] },
+      field = 'children',
+      mapCreateColumn,
+      mapCreateData
+    } = options
+    const tableOptions = {
+      startCol,
+      data,
+      field,
+      mapCreateColumn,
+      mapCreateData,
+      merge: false, // 不需要合并
+      reverse: false // 不需要反转
+    }
+    super(tableOptions)
+    this.calculate()
+  }
+
+  calculate () {
+    const {
+      startCol,
+      data: {
+        rowList,
+        columnList
+      }
+    } = this.options
+    const mergeCells = []
+    for (let rowIndex = 0; rowIndex < rowList.length; rowIndex++) {
+      const row = rowList[rowIndex]
+      const userRowSpan = row.rowspan
+      const userColSpan = row.colspan
+      let rowSite = rowIndex
+      let rowspan = userRowSpan && userRowSpan > 0 ? userRowSpan : 1
+
+      for (let columnIndex = 0; columnIndex < columnList.length; columnIndex++) {
+        const column = columnList[columnIndex]
+        let colSite = startCol + columnIndex
+        let colspan = userColSpan && userColSpan > 0 ? userColSpan : 1
+        const cell = {
+          row: rowIndex,
+          col: colSite,
+          rowspan,
+          colspan
+        }
+        this.mapCreateData({
+          row,
+          rowIndex,
+          column,
+          columnIndex,
+          cell
+        })
+
+        mergeCells.push(cell)
+      }
+    }
+    this.mergeCells = mergeCells
+    this.mapCreateColumn()
+  }
+
+  // 处理excel中的文字内容
+  handleExcelText (cell, excel) {
+    if (isObject(excel)) {
+      /**
+       * excel单元格格式根据text格式决定
+       * text为字符串:excel单元格格式就是字符串
+       * text为数字:excel单元格格式就是数字
+       * text为日期:excel单元格格式就是日期
+       */
+      const text = excel.text
+      cell.text = text ? text : ''
+
+      if (hasOwnProperty(excel, 'format')) {
+        cell.numFmt = excel.format
+        // 等待处理
+        cell.text = moment(text).format(excel.format.toUpperCase())
+      }
+    }
+  }
+
+  // 处理excel列
+  handleExcelColumn (columns) {
+    if (columns[0].excel && isObject(columns[0].excel)) {
+      this.excel.columnStyle = columns.map(item => item.excel)
+    }
+  }
+
+  // 处理excel行
+  handleExcelRow (excel) {
+    if (isObject(excel)) {
+      const copyStyle = { ...excel }
+      // text和format单独被handleExcelText处理
+      const dirtyFields = ['text', 'style', 'format']
+      const dirtyFieldsLen = dirtyFields.length
+      for (let i = 0; i < dirtyFieldsLen; i++) {
+        const field = dirtyFields[i]
+        if (hasOwnProperty(copyStyle, field)) {
+          delete copyStyle[field]
+        }
+      }
+      this.excel.rowStyle.push(copyStyle)
+    }
+  }
+
+  // 处理excel单元格
+  handleExcelCell (cell, excel = {}) {
+    let style = {}
+    const userStyle = excel.style
+    if (isObject(userStyle)) {
+      style = userStyle
+    }
+    cell.style = style
+  }
+
+  mapCreateData ({ row, rowIndex, column, columnIndex, cell }) {
+    const { options } = this
+    if (options.mapCreateData) {
+      const { key, value, excel } = options.mapCreateData({ row, rowIndex, column, columnIndex }) || { key: '', value: '', excel: {} }
+      if (this.data[rowIndex]) {
+        this.data[rowIndex] = { ...this.data[rowIndex], [key]: value }
+      } else {
+        this.data[rowIndex] = { [key]: value }
+        this.handleExcelRow(excel)
+      }
+      this.handleExcelText(cell, excel)
+      this.handleExcelCell(cell, excel)
     }
   }
 

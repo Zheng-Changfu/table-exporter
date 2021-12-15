@@ -4,7 +4,7 @@ import {
   mapCreateTable
 } from '../table-helpers/helpers'
 import { STableExporter } from '../excel-download'
-import { createArray, isFunction, isObject } from "../excel-download/util"
+import { createArray, isFunction, isObject, hasOwnProperty } from "../excel-download/util"
 import { defaultColumnStyle, defaultThRowStyle } from '../excel-download/excel-style'
 
 
@@ -62,14 +62,17 @@ export class ElMapExportTable {
       mapCreateData: ({ data, columnIndex, rowIndex }) => {
         const key = `${columnIndex}-field`
         const value = data[field]
-        const columnKey = data.dataIndex
-        columnKeys.push(columnKey)
+        if (hasOwnProperty(data, 'dataIndex')) {
+          const columnKey = data.dataIndex
+          columnKeys.push(columnKey)
+        }
         return {
           key,
           value,
           excel: {
             text: value, // 预留覆盖文本
             ...this.setRowStyle(rest.setRowStyle, { data, columnIndex, rowIndex }, true),
+            ...this.setCellStyle(rest.setCellStyle, { data, columnIndex, rowIndex })
           }
         }
       },
@@ -132,6 +135,7 @@ export class ElMapExportTable {
             excel: {
               text: value,
               ...this.setRowStyle(rest.setRowStyle, { row, columnIndex, rowIndex }, false),
+              ...this.setCellStyle(rest.setCellStyle, { row, columnIndex, rowIndex })
             }
           }
         },
@@ -172,6 +176,20 @@ export class ElMapExportTable {
       }
     }
     return style
+  }
+
+  // 设置单元格样式
+  setCellStyle (userSetCellStyle, { data, columnIndex, rowIndex }) {
+    let result = {
+      style: {}
+    }
+    if (isFunction(userSetCellStyle)) {
+      const userStyle = userSetCellStyle({ data, columnIndex, rowIndex })
+      if (isObject(userStyle)) {
+        result.style = userStyle
+      }
+    }
+    return result
   }
 
   // 设置sheet相关样式
