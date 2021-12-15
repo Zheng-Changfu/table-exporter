@@ -1,10 +1,10 @@
 <template>
-  <router-view />
+  <div>ExportTable5</div>
 </template>
 
 <script>
 export default {
-  name: "App",
+  name: "ExportTable5",
 };
 </script>
 

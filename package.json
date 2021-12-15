@@ -9,7 +9,14 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "vue": "^2.6.11"
+    "element-ui": "^2.15.6",
+    "exceljs": "^4.3.0",
+    "file-saver": "^2.0.5",
+    "moment": "^2.29.1",
+    "vue": "^2.6.11",
+    "vue-router": "^3.5.3",
+    "vxe-table": "3.3.10",
+    "xe-utils": "3.3.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
