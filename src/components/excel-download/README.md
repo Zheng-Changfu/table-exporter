@@ -4,9 +4,11 @@
 
 ## 1. 导出正常表格到Excel
 
-![](../../assets/导出正常表格-1.png) 
-
 ![](../../assets/导出正常表格-2.png)   
+
+> 正常按表格格式书写 **column 和 data, dataIndex 为对应数据源的字段**
+>
+> 注意：**column 中的 key 默认为 title，可通过 columnKey 设置**
 
 ```js
 # code
@@ -53,9 +55,11 @@ const data = [
 
 ## 2. 导出表头合并到Excel
 
-![](../../assets/导出表头合并表格-1.png) 
-
 ![](../../assets/导出表头合并表格-2.png) 
+
+> 表头的合并，将对应的**列设置成相应的树形结构**
+>
+> 注意：**树形结构默认的孩子字段为 children,可通过 childrenKey 设置**
 
 ```js
 # code
@@ -65,11 +69,10 @@ handleExport() {
         { column, data },
         { progress: progress => console.log(progress) }// 进度条回调 
       );
-      instance.download("导出合并单元格的表格案例");
+      instance.download("导出表头合并的表格案例");
 }
 
 # column
-// 如果是合并单元格的列,设置成相应的树形结构即可
 const column = [
     { title: "日期", dataIndex: "date" },
     {
@@ -150,11 +153,224 @@ const data = [
 ]
 ```
 
-## 3. 导出表体合并到Excel
+## 3. 导出表体合并到Excel 
+
+![](../../assets/导出表体合并表格-2.png) 
+
+> 表体的合并，指定 **spanMethod**函数，该函数接收 **4个参数**，返回值为**对象格式,可写参数为 rowspan、colspan**
+>
+> **row**：当前行数据
+>
+> **column**：当前列数据
+>
+> **rowIndex**：当前行索引
+>
+> **columnIndex**：当前列索引
+
+```js
+# code
+// 点击导出触发的函数
+handleExport() {
+      const instance = new ElMapExportTable(
+        { column, data },
+        {
+          progress: progress => console.log(progress),
+          spanMethod: ({ row, column, rowIndex, columnIndex }) => {
+            if (columnIndex === 0) {
+              if (rowIndex % 2 === 0) {
+                return {
+                  rowspan: 2,
+                  colspan: 1,
+                };
+              }
+            }
+          },
+        }
+      );
+      instance.download("导出表体合并案例");
+}
+
+# column
+const column = [
+        { title: "ID", dataIndex: "id" },
+        { title: "姓名", dataIndex: "name" },
+        { title: "数值1（元）", dataIndex: "amount1" },
+        { title: "数值2（元）", dataIndex: "amount2" },
+        { title: "数值3（元）", dataIndex: "amount3" },
+];
+
+# data
+const data = [
+        {
+          id: "12987122",
+          name: "王小虎1",
+          amount1: "234",
+          amount2: "3.2",
+          amount3: 10,
+        },
+        {
+          id: "12987123",
+          name: "王小虎2",
+          amount1: "165",
+          amount2: "4.43",
+          amount3: 12,
+        },
+        {
+          id: "12987124",
+          name: "王小虎3",
+          amount1: "324",
+          amount2: "1.9",
+          amount3: 9,
+        },
+        {
+          id: "12987125",
+          name: "王小虎4",
+          amount1: "621",
+          amount2: "2.2",
+          amount3: 17,
+        },
+        {
+          id: "12987126",
+          name: "王小虎5",
+          amount1: "539",
+          amount2: "4.1",
+          amount3: 15,
+        },
+];
+```
 
 ## 4. 导出混合合并到Excel
 
+![](../../assets/导出混合表格到Excel.png) 
 
+> 混合合并，只需要结合**表头合并 + 表体合并即可**
+
+```js
+# code
+// 点击导出触发的函数
+handleExport() {
+      const instance = new ElMapExportTable(
+        { column, data },
+        { 
+            progress: progress => console.log(progress),
+            spanMethod: ({ rowIndex, columnIndex }) => {
+            if (columnIndex === 0 && rowIndex === 0) {
+              return {
+                rowspan: 2,
+                colspan: 2,
+              };
+            }
+            if (rowIndex === 2 && columnIndex === 2) {
+              return {
+                rowspan: 1,
+                colspan: 3,
+              };
+            }
+            if (rowIndex === 0 && columnIndex === 4) {
+              return {
+                rowspan: 2,
+                colspan: 1,
+              };
+            }
+            if (rowIndex === 6 && columnIndex === 0) {
+              return {
+                rowspan: 1,
+                colspan: 6,
+              };
+            }
+          },
+        }
+      );
+      instance.download("导出正常表格案例");
+}
+
+# column
+const column = [
+        { title: "姓名", dataIndex: "name" },
+        { title: "年龄", dataIndex: "age" },
+        {
+          title: "配送信息",
+          children: [
+            {
+              title: "地址",
+              children: [
+                { title: "省份", dataIndex: "province" },
+                { title: "市区", dataIndex: "city" },
+                { title: "地址", dataIndex: "address" },
+                { title: "邮编", dataIndex: "zip" },
+              ],
+            },
+          ],
+        },
+];
+
+# data
+const data = [
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-01",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-08",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-08",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-07",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+]
+```
 
 ## 5. 导出图片到Excel
 
@@ -162,17 +378,110 @@ const data = [
 
 ## 6. 设置Excel的列样式
 
+![](../../assets/设置Excel的列样式.png) 
 
+> 提供 **setColumnStyle函数, 该函数接收一个参数,参数格式为对象,包含 columnIndex (当前列索引)**
+>
+> 返回值为**对象,具体可写的所有样式参考https://github.com/exceljs/exceljs/blob/master/README_zh.md#%E6%A0%B7%E5%BC%8F**
+
+```js
+# code
+// 点击导出触发的函数内
+handleExport(){
+  const instance = new ElMapExportTable(
+     {
+         column,
+         data,
+         setColumnStyle({ columnIndex }) {
+             if (columnIndex === 2) {
+                 return { width: 40, style: { font: { bold: true } } };
+             }
+         },
+     },
+     { progress: progress => console.log(progress) }
+ );
+  instance.download("设置Excel的列样式");  
+}
+```
 
 ## 7. 设置Excel的行样式
 
+![](../../assets/设置Excel的行样式.png) 
 
+提供 **setRowStyle** 函数
+
+该函数接收一个参数,参数格式为对象,包含 **data (数据源)、rowIndex (当前行索引)、columnIndex (当前列索引)、type (标识当前是表头还是表体)**
+
+返回值为**对象,具体可写的所有样式参考https://github.com/exceljs/exceljs/blob/master/README_zh.md#%E8%A1%8C**
+
+```js
+# code
+// 点击导出触发的函数内
+handleExport(){
+  const instance = new ElMapExportTable(
+     {
+         column,
+         data,
+         setRowStyle({ data, columnIndex, rowIndex, type }) {
+            console.log({ data, columnIndex, rowIndex, type });
+            if (type === "main") {
+              return {
+                height: 40,
+              };
+            }
+          },
+     },
+     { progress: progress => console.log(progress) }
+ );
+  instance.download("设置Excel的行样式");
+}
+```
 
 ## 8. 设置Execl的单元格样式
 
+![](../../assets/设置Excel的单元格样式.png) 
+
+> 提供 **setCellStyle** 函数
+>
+> 该函数接收一个参数,参数格式为对象,包含 **data (数据源)、rowIndex (当前行索引)、columnIndex (当前列索引)、type (标识当前是表头还是表体)**
+>
+> 返回值为**对象,具体可写的所有样式参考https://github.com/exceljs/exceljs/blob/master/README_zh.md#%E6%A0%B7%E5%BC%8F**
+
+```js
+// 点击导出触发的函数内
+handleExport(){
+  const instance = new ElMapExportTable(
+     {
+         column,
+         data,
+         setCellStyle({ data, columnIndex, rowIndex, type }) {
+            console.log({ data, columnIndex, rowIndex, type });
+            if (type === "main" && columnIndex === 2) {
+              return {
+                font: {
+                  size: 16, // 字体大小
+                  bold: true, // 字体加粗
+                  italic: true, // 字体倾斜
+                  color: { argb: "FFFF0000" }, // 字体颜色
+                },
+                // fill: {
+                //   type: "pattern",
+                //   pattern: "solid",
+                //   fgColor: { argb: "FF0000FF" }, // 填充背景颜色
+                // },
+              };
+            }
+          },
+     },
+     { progress: progress => console.log(progress) }
+ );
+  instance.download("设置Excel的单元格样式");
+}
+```
 
 
-## 9. 设置Excel单元格格式
+
+## 9. 自定义Excel单元格格式
 
 
 
@@ -200,47 +509,4 @@ const data = [
 
 ## 参数说明
 
-### 1. STableExporter配置
-
-| 参数    | 说明                             | 类型            | 默认值 |
-| ------- | -------------------------------- | --------------- | ------ |
-| process | 导出进度的回调函数               | function(value) | -      |
-| tables  | 所有表格的数据集(具体配置见下表) | array           | []     |
-
-### 2. table配置
-
-| 参数             | 说明                                                         | 类型   | 默认值 |
-| ---------------- | ------------------------------------------------------------ | ------ | ------ |
-| headerData       | 头部数据(具体配置见下表)                                     | object | {}     |
-| mainData         | 身体数据(具体配置见下表)                                     | object | {}     |
-| footerData       | 表尾数据(具体配置见下表)                                     | object | {}     |
-| insertHeaderData | 要插入的头部数据(具体配置见下表)                             | object | {}     |
-| options          | 当前的工作表配置(参考 **exceljs** ),可以在这里设置固定列、固定行 | object | {}     |
-
-### 3. data配置
-
-| 参数            | 说明                                                         | 类型   | 默认值 |
-| --------------- | ------------------------------------------------------------ | ------ | ------ |
-| cells           | 单元格信息(具体配置见下表)                                   | array  | []     |
-| columnStyle     | 列样式集合(参考 **exceljs** )                                | array  | []     |
-| rowStyle        | 行样式集合(参考 **exceljs** )                                | array  | []     |
-| rowLength(必填) | 所有行的总长度( **row** + **rowspan** )                      | number |        |
-| options         | **excel** -当前 **sheet** 配置(参考 **exceljs** ),可以在这里处理固定列、固定行 | object | {}     |
-
-### 4. cell配置
-
-| 参数    | 说明                                                         | 类型   | 默认值 |
-| ------- | ------------------------------------------------------------ | ------ | ------ |
-| row     | 当前单元格在第几行(从 **0** 开始)                            | number | -      |
-| col     | 当前单元格在第几列(从 **0** 开始)                            | number | -      |
-| rowspan | 当前单元格向右合并多少个单元格(包括自己)                     | number | 1      |
-| colspan | 当前单元格向下合并多少个单元格(包括自己)                     | number | 1      |
-| text    | 当前单元格中的内容(这里的 **text** 会显示在对应的 **excel** 的单元格中) | any    | ''     |
-| format  | 当前单元格对应的excel单元格格式                              | -      | -      |
-
-## 5. 建议
-
-- 在封装辅助函数期间,因为业务原因,只考虑用虚拟表格来实现业务功能，所以如果此包搭配**虚拟表格**使用效果是最佳的，不必额外遍历
-- 如果使用的是其他**表格，诸如 element-ui、ant-vue...**类似的表格,也可以使用辅助函数来完成效果，但是增加了一些为了导出而造成额外遍历处理数据的操作,尽管也不需要额外的逻辑,但是多了一部分的代码
-- 建议：如果使用的是**element-ui...等表格**,可以封装一个出自己的**辅助函数**,在**表格渲染前**将数据流向**辅助函数**,然后通过**辅助函数去渲染表格**,这样在集成**导出功能时直接将收集的信息交给导出即可**
-
+### 

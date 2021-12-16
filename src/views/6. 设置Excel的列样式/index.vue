@@ -10,29 +10,6 @@
       :stroke-width="20"
       :percentage="percentage"
     ></el-progress>
-    <el-table
-      border
-      :data="tableData"
-      style="width: 100%"
-    >
-      <el-table-column
-        prop="date"
-        label="日期"
-        width="180"
-      >
-      </el-table-column>
-      <el-table-column
-        prop="name"
-        label="姓名"
-        width="180"
-      >
-      </el-table-column>
-      <el-table-column
-        prop="address"
-        label="地址"
-      >
-      </el-table-column>
-    </el-table>
   </div>
 </template>
 
@@ -42,7 +19,17 @@ export default {
   name: "ExportTable1",
   data() {
     return {
-      tableData: [
+      percentage: 0,
+    };
+  },
+  methods: {
+    handleExport() {
+      const column = [
+        { title: "日期", dataIndex: "date" },
+        { title: "姓名", dataIndex: "name" },
+        { title: "地址", dataIndex: "address" },
+      ];
+      const data = [
         {
           date: "2016-05-02",
           name: "王小虎",
@@ -63,22 +50,20 @@ export default {
           name: "王小虎",
           address: "上海市普陀区金沙江路 1516 弄",
         },
-      ],
-      percentage: 0,
-    };
-  },
-  methods: {
-    handleExport() {
-      const column = [
-        { title: "日期", dataIndex: "date" },
-        { title: "姓名", dataIndex: "name" },
-        { title: "地址", dataIndex: "address" },
       ];
       const instance = new ElMapExportTable(
-        { column, data: this.tableData },
+        {
+          column,
+          data,
+          setColumnStyle({ columnIndex }) {
+            if (columnIndex === 2) {
+              return { width: 40, style: { font: { bold: true } } };
+            }
+          },
+        },
         { progress: this.handlePercentage }
       );
-      instance.download("导出正常表格案例");
+      instance.download("设置Excel的列样式");
     },
     handlePercentage(percentage) {
       this.percentage = percentage;

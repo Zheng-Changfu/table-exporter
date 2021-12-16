@@ -10,29 +10,6 @@
       :stroke-width="20"
       :percentage="percentage"
     ></el-progress>
-    <el-table
-      border
-      :data="tableData"
-      style="width: 100%"
-    >
-      <el-table-column
-        prop="date"
-        label="日期"
-        width="180"
-      >
-      </el-table-column>
-      <el-table-column
-        prop="name"
-        label="姓名"
-        width="180"
-      >
-      </el-table-column>
-      <el-table-column
-        prop="address"
-        label="地址"
-      >
-      </el-table-column>
-    </el-table>
   </div>
 </template>
 
@@ -42,43 +19,127 @@ export default {
   name: "ExportTable1",
   data() {
     return {
-      tableData: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄",
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄",
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄",
-        },
-      ],
       percentage: 0,
     };
   },
   methods: {
     handleExport() {
       const column = [
-        { title: "日期", dataIndex: "date" },
         { title: "姓名", dataIndex: "name" },
-        { title: "地址", dataIndex: "address" },
+        { title: "年龄", dataIndex: "age" },
+        {
+          title: "配送信息",
+          children: [
+            {
+              title: "地址",
+              children: [
+                { title: "省份", dataIndex: "province" },
+                { title: "市区", dataIndex: "city" },
+                { title: "地址", dataIndex: "address" },
+                { title: "邮编", dataIndex: "zip" },
+              ],
+            },
+          ],
+        },
+      ];
+      const data = [
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-01",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-08",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-08",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
+        {
+          date: "2016-05-07",
+          name: "王小虎",
+          age: 20,
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333,
+        },
       ];
       const instance = new ElMapExportTable(
-        { column, data: this.tableData },
-        { progress: this.handlePercentage }
+        { column, data },
+        {
+          progress: this.handlePercentage,
+          spanMethod: ({ rowIndex, columnIndex }) => {
+            if (columnIndex === 0 && rowIndex === 0) {
+              return {
+                rowspan: 2,
+                colspan: 2,
+              };
+            }
+            if (rowIndex === 2 && columnIndex === 2) {
+              return {
+                rowspan: 1,
+                colspan: 3,
+              };
+            }
+            if (rowIndex === 0 && columnIndex === 4) {
+              return {
+                rowspan: 2,
+                colspan: 1,
+              };
+            }
+            if (rowIndex === 6 && columnIndex === 0) {
+              return {
+                rowspan: 1,
+                colspan: 6,
+              };
+            }
+          },
+        }
       );
-      instance.download("导出正常表格案例");
+      instance.download("导出混合合并到Excel");
     },
     handlePercentage(percentage) {
       this.percentage = percentage;

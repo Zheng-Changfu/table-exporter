@@ -1,6 +1,5 @@
 import {
   mapCreateMergeHeaderTable,
-  // mapCreateMergeMainTable,
   mapCreateCombinTable,
   mapCreateTable,
 } from '../table-helpers/helpers'
@@ -74,8 +73,8 @@ export class ElMapExportTable {
           value,
           excel: {
             text: value, // 预留覆盖文本
-            ...this.setRowStyle(rest.setRowStyle, { data, columnIndex, rowIndex }, true),
-            ...this.setCellStyle(rest.setCellStyle, { data, columnIndex, rowIndex })
+            ...this.setRowStyle(rest.setRowStyle, { data, columnIndex, rowIndex, type: 'header' }, true),
+            ...this.setCellStyle(rest.setCellStyle, { data, columnIndex, rowIndex, type: 'header' })
           }
         }
       },
@@ -135,21 +134,30 @@ export class ElMapExportTable {
             value,
             excel: {
               text: value,
-              ...this.setRowStyle(rest.setRowStyle, { row, columnIndex, rowIndex }, false),
-              ...this.setCellStyle(rest.setCellStyle, { row, columnIndex, rowIndex })
+              ...this.setRowStyle(rest.setRowStyle, { data: row, columnIndex, rowIndex, type: 'main' }, false),
+              ...this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
             }
           }
         },
         spanMethod: ({ row, column, rowIndex, columnIndex }) => {
           let result = { rowspan: 1, colspan: 1 }
           const { rowspan, colspan } = spanMethod({ row, column, rowIndex, columnIndex }) || {}
-          if (isNumber(rowspan) && rowspan > 1) result.rowspan = rowspan
-          if (isNumber(colspan) && colspan > 1) result.colspan = colspan
+          if (isNumber(rowspan) && rowspan > 1) {
+            // 如果行超出范围就进行修正
+            result.rowspan = rowIndex + rowspan - 1 > userData.length - 1
+              ? userData.length - rowIndex
+              : rowspan
+          }
+          if (isNumber(colspan) && colspan > 1) {
+            // 如果列超出范围就进行修正
+            result.colspan = columnIndex + colspan - 1 > columnKeys.length - 1
+              ? columnKeys.length - columnIndex
+              : colspan
+          }
           return result
         },
         field: childrenKey
       })
-      console.log(mergeCells, 'mergeCells')
       result = {
         cells: mergeCells,
         rowStyle,
@@ -183,8 +191,8 @@ export class ElMapExportTable {
             value,
             excel: {
               text: value,
-              ...this.setRowStyle(rest.setRowStyle, { row, columnIndex, rowIndex }, false),
-              ...this.setCellStyle(rest.setCellStyle, { row, columnIndex, rowIndex })
+              ...this.setRowStyle(rest.setRowStyle, { data: row, columnIndex, rowIndex, type: 'main' }, false),
+              ...this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
             }
           }
         },
@@ -216,10 +224,10 @@ export class ElMapExportTable {
   }
 
   // 设置行样式
-  setRowStyle (userSetRowStyle, { data, columnIndex, rowIndex }, isHeaderRow = false) {
+  setRowStyle (userSetRowStyle, { data, columnIndex, rowIndex, type }, isHeaderRow = false) {
     let style = isHeaderRow ? defaultThRowStyle : {}
     if (isFunction(userSetRowStyle)) {
-      const userStyle = userSetRowStyle({ data, columnIndex, rowIndex })
+      const userStyle = userSetRowStyle({ data, columnIndex, rowIndex, type })
       if (isObject(userStyle)) {
         style = userStyle
       }
@@ -228,12 +236,12 @@ export class ElMapExportTable {
   }
 
   // 设置单元格样式
-  setCellStyle (userSetCellStyle, { data, columnIndex, rowIndex }) {
+  setCellStyle (userSetCellStyle, { data, columnIndex, rowIndex, type }) {
     let result = {
       style: {}
     }
     if (isFunction(userSetCellStyle)) {
-      const userStyle = userSetCellStyle({ data, columnIndex, rowIndex })
+      const userStyle = userSetCellStyle({ data, columnIndex, rowIndex, type })
       if (isObject(userStyle)) {
         result.style = userStyle
       }
@@ -276,110 +284,5 @@ export class ElMapExportTable {
     exportInstance.export();
     exportInstance.download(fileName);
   }
-
 }
-// fn({
-//   // 指定所有的列,如果是需要合并,请用树形结构来描述
-//   // dataIndex: 这一列对应的数据源字段
-//   columns: [
-//     { title: '日期', dataIndex: 'date' },
-//     {
-//       title: '配送信息', children: [
-//         { title: '姓名', dataIndex: 'name' },
-//         {
-//           title: '地址', children: [
-//             { title: '省份', dataIndex: 'province' },
-//             { title: '市区', dataIndex: 'city' },
-//             { title: '地址', dataIndex: 'address' },
-//             { title: '邮编', dataIndex: 'zip' }
-//           ]
-//         }
-//       ]
-//     }
-//   ],
-//   data: [
-//     {
-//       date: "2016-05-03",
-//       name: "王小虎",
-//       province: "上海",
-//       city: "普陀区",
-//       address: "上海市普陀区金沙江路 1518 弄",
-//       zip: 200333,
-//     },
-//     {
-//       date: "2016-05-02",
-//       name: "王小虎",
-//       province: "上海",
-//       city: "普陀区",
-//       address: "上海市普陀区金沙江路 1518 弄",
-//       zip: 200333,
-//     },
-//     {
-//       date: "2016-05-04",
-//       name: "王小虎",
-//       province: "上海",
-//       city: "普陀区",
-//       address: "上海市普陀区金沙江路 1518 弄",
-//       zip: 200333,
-//     },
-//     {
-//       date: "2016-05-01",
-//       name: "王小虎",
-//       province: "上海",
-//       city: "普陀区",
-//       address: "上海市普陀区金沙江路 1518 弄",
-//       zip: 200333,
-//     },
-//     {
-//       date: "2016-05-08",
-//       name: "王小虎",
-//       province: "上海",
-//       city: "普陀区",
-//       address: "上海市普陀区金沙江路 1518 弄",
-//       zip: 200333,
-//     },
-//     {
-//       date: "2016-05-06",
-//       name: "王小虎",
-//       province: "上海",
-//       city: "普陀区",
-//       address: "上海市普陀区金沙江路 1518 弄",
-//       zip: 200333,
-//     },
-//     {
-//       date: "2016-05-07",
-//       name: "王小虎",
-//       province: "上海",
-//       city: "普陀区",
-//       address: "上海市普陀区金沙江路 1518 弄",
-//       zip: 200333,
-//     },
-//   ],
-//   // 如果表体区域也要进行合并,请指定需要合并的范围索引,索引从0开始
-//   dataMergeRange: {
-//     start: 0, end: 4,
-//   },
-//   setColumnStyle ({ columnLen }) {
 
-//   },
-//   setRowStyle () {
-
-//   },
-//   setCellStyle () {
-
-//   },
-//   setSheetStyle () {
-
-//   },
-//   setInsertData () {
-
-//   },
-//   columnKey: 'title', // 用列中的哪个字段来进行渲染excel文本
-//   childrenKey: 'children',// 如果有嵌套列配置，请指定 子配置字段名
-//   sheetName: '123', // 当前sheet名字
-// })
-
-// 导出多个sheet
-// 每一个对象遵循上面配置即可
-// const exportInstance = fn([{}, {}, {}])
-// exportInstance.download('12213123')

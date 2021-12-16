@@ -301,122 +301,6 @@ export class MapCreateMergeHeaderTable extends MapTable {
   }
 }
 
-// 辅助创建需要合并的表体
-export class MapCreateMergeMainTable extends MapTable {
-  constructor(options) {
-    const {
-      data = [],
-      hooks = {},
-      field = 'children',
-      startCol = 0,
-      mapCreateColumn,
-      mapCreateData
-    } = options
-    const tableOptions = {
-      data,
-      hooks,
-      field,
-      startCol,
-      mapCreateColumn,
-      mapCreateData,
-      merge: true, // 需要合并
-      reverse: true, // 需要反转
-      combin: false // 不需要组合
-    }
-    super(tableOptions)
-    this.callhook(this, 'beforeMapCreateColumn')
-    this.mapCreateColumn()
-    this.callhook(this, 'mapCreateColumned')
-  }
-
-  // 处理excel中的文字内容
-  handleExcelText (cell, excel) {
-    if (isObject(excel)) {
-      /**
-       * excel单元格格式根据text格式决定
-       * text为字符串:excel单元格格式就是字符串
-       * text为数字:excel单元格格式就是数字
-       * text为日期:excel单元格格式就是日期
-       */
-      const text = excel.text
-      cell.text = text ? text : ''
-
-      if (hasOwnProperty(excel, 'format')) {
-        cell.numFmt = excel.format
-        // 设置日期格式,可以自行处理日期格式,不必使用moment
-        cell.text = moment(text).format(excel.format.toUpperCase())
-      }
-    }
-  }
-
-  // 处理excel列
-  handleExcelColumn (columns) {
-    const firstColumn = columns[0]
-    if (isObject(firstColumn) && firstColumn.excel && isObject(firstColumn.excel)) {
-      this.excel.columnStyle = columns.map(item => item.excel)
-    }
-  }
-
-  // 处理excel行
-  handleExcelRow (excel) {
-    if (isObject(excel)) {
-      const copyStyle = { ...excel }
-      // text和format单独被handleExcelText处理
-      const dirtyFields = ['text', 'style', 'format']
-      const dirtyFieldsLen = dirtyFields.length
-      for (let i = 0; i < dirtyFieldsLen; i++) {
-        const field = dirtyFields[i]
-        if (hasOwnProperty(copyStyle, field)) {
-          delete copyStyle[field]
-        }
-      }
-      this.excel.rowStyle.push(copyStyle)
-    }
-  }
-
-  // 处理excel单元格
-  handleExcelCell (cell, excel = {}) {
-    let style = {}
-    const userStyle = excel.style
-    if (isObject(userStyle)) {
-      style = userStyle
-    }
-    cell.style = style
-  }
-
-  mapCreateColumn () {
-    const { maxDepth, options } = this
-    if (options.mapCreateData) {
-      const columns = options.mapCreateColumn({ columnLen: maxDepth })
-      this.handleExcelColumn(columns)
-      this.columns = columns
-    }
-  }
-
-  // 辅助创建行数据
-  mapCreateData (item) {
-    const { options } = this
-    if (options.mapCreateData) {
-      const cell = item._cell
-      const rowIndex = cell.row
-      const columnIndex = cell.col
-      const { key, value, excel } = options.mapCreateData({
-        data: item,
-        rowIndex,
-        columnIndex
-      }) || { key: '', value: '', excel: {} }
-      if (this.data[rowIndex]) {
-        this.data[rowIndex] = { ...this.data[rowIndex], [key]: value }
-      } else {
-        this.data[rowIndex] = { [key]: value }
-        this.handleExcelRow(excel)
-      }
-      this.handleExcelText(cell, excel)
-      this.handleExcelCell(cell, excel)
-    }
-  }
-}
-
 // 辅助创建不需要合并的表格
 export class MapCreateNoMergeTable extends MapTable {
   constructor(options) {
@@ -464,7 +348,7 @@ export class MapCreateNoMergeTable extends MapTable {
           row,
           rowIndex,
           column,
-          columnIndex,
+          columnIndex: columnIndex + startCol,
           cell
         })
 
@@ -600,13 +484,14 @@ export class MapCreateCombinMainTable extends MapTable {
     for (let rowIndex = 0; rowIndex < rowList.length; rowIndex++) {
       const row = rowList[rowIndex]
       for (let columnIndex = 0; columnIndex < columnList.length; columnIndex++) {
-        const column = columnList[columnIndex]
-        const dirty = row[`_dirty${rowIndex}${columnIndex}`]
         // 跳过已经被合并的单元格
+        const dirtyKey = `_dirty${rowIndex}${columnIndex}`
+        const dirty = row[dirtyKey]
         if (dirty) {
-          delete row[`_dirty${rowIndex}${columnIndex}`]
+          delete row[dirtyKey]
           continue
         }
+        const column = columnList[columnIndex]
         const cell = isCursomMerge
           ? spanMethod({
             row,
@@ -622,13 +507,36 @@ export class MapCreateCombinMainTable extends MapTable {
         cell.col = startCol + columnIndex
         const dirtyRowNumber = cell.rowspan - 1
         const dirtyColNumber = cell.colspan - 1
-        for (let i = columnIndex + 1; i <= dirtyColNumber; i++) {
-          row[`_dirty${rowIndex}${i}`] = true
-        }
-        for (let i = rowIndex + 1; i <= dirtyRowNumber; i++) {
-          const nextRow = rowList[i]
-          if (isObject(nextRow)) {
-            nextRow[`_dirty${i}${columnIndex}`] = true
+
+        if (dirtyRowNumber > 0 && dirtyColNumber > 0) {
+          // 多行多列合并
+          const { rowspan, colspan } = cell
+          for (let i = 1; i <= rowspan; i++) {
+            const currentRowIndex = rowIndex + i - 1
+            const currentRow = rowList[currentRowIndex]
+            if (isObject(currentRow)) {
+              currentRow[`_dirty${currentRowIndex}${columnIndex}`] = true
+              for (let j = 1; j <= colspan; j++) {
+                const currentColumnIndex = columnIndex + j - 1
+                const dirty = currentRow[`_dirty${currentRowIndex}${currentColumnIndex}`]
+                if (!dirty) {
+                  currentRow[`_dirty${currentRowIndex}${currentColumnIndex}`] = true
+                }
+              }
+            }
+          }
+          // 当前行当前列不是脏数据,不能跳过
+          delete row[`_dirty${rowIndex}${columnIndex}`]
+        } else {
+          // 行合并或者列合并
+          for (let i = 1; i <= dirtyColNumber; i++) {
+            row[`_dirty${rowIndex}${columnIndex + i}`] = true
+          }
+          for (let i = 1; i <= dirtyRowNumber; i++) {
+            const nextRow = rowList[rowIndex + i]
+            if (isObject(nextRow)) {
+              nextRow[`_dirty${rowIndex + i}${columnIndex}`] = true
+            }
           }
         }
 
@@ -636,7 +544,7 @@ export class MapCreateCombinMainTable extends MapTable {
           row,
           rowIndex,
           column,
-          columnIndex,
+          columnIndex: startCol + columnIndex,
           cell
         })
         mergeCells.push(cell)
@@ -730,6 +638,3 @@ export class MapCreateCombinMainTable extends MapTable {
     }
   }
 }
-
-
-
