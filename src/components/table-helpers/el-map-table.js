@@ -1,10 +1,11 @@
 import {
   mapCreateMergeHeaderTable,
   // mapCreateMergeMainTable,
-  mapCreateTable
+  mapCreateCombinTable,
+  mapCreateTable,
 } from '../table-helpers/helpers'
 import { STableExporter } from '../excel-download'
-import { createArray, isFunction, isObject, hasOwnProperty } from "../excel-download/util"
+import { createArray, isFunction, isObject, isNumber, hasOwnProperty } from "../excel-download/util"
 import { defaultColumnStyle, defaultThRowStyle } from '../excel-download/excel-style'
 
 
@@ -12,6 +13,7 @@ export class ElMapExportTable {
   constructor(configData = {}, options = {}) {
     this.tables = []
     this.progress = options.progress
+    this.spanMethod = options.spanMethod || undefined
     this.calculate(configData)
   }
 
@@ -33,6 +35,7 @@ export class ElMapExportTable {
         sheetName,
         options,
       }
+      console.log(table, 'table')
       this.tables.push(table)
     }
   }
@@ -98,14 +101,60 @@ export class ElMapExportTable {
   handleExcelMain (config, columnKeys) {
     let {
       data: userData = [],
-      dataMergeRange = [],
       childrenKey = 'children',
       ...rest
     } = config
-    dataMergeRange = isObject(dataMergeRange) ? [dataMergeRange] : dataMergeRange
     let result = null
-    if (dataMergeRange.length > 0) {
+    const spanMethod = this.spanMethod
+    const isCombin = spanMethod && isFunction(spanMethod)
+    if (isCombin) {
       // 组合
+      const {
+        mergeCells,
+        data,
+        excel: {
+          rowStyle
+        }
+      } = mapCreateCombinTable({
+        data: {
+          rowList: userData,
+          columnList: columnKeys
+        },
+        mapCreateColumn: ({ columnLen }) => {
+          return createArray(columnLen, index => {
+            return {
+              field: `${index}-field`,
+            }
+          })
+        },
+        mapCreateData: ({ row, column, rowIndex, columnIndex }) => {
+          const key = `${columnIndex}-field`
+          const value = row[column]
+          return {
+            key,
+            value,
+            excel: {
+              text: value,
+              ...this.setRowStyle(rest.setRowStyle, { row, columnIndex, rowIndex }, false),
+              ...this.setCellStyle(rest.setCellStyle, { row, columnIndex, rowIndex })
+            }
+          }
+        },
+        spanMethod: ({ row, column, rowIndex, columnIndex }) => {
+          let result = { rowspan: 1, colspan: 1 }
+          const { rowspan, colspan } = spanMethod({ row, column, rowIndex, columnIndex }) || {}
+          if (isNumber(rowspan) && rowspan > 1) result.rowspan = rowspan
+          if (isNumber(colspan) && colspan > 1) result.colspan = colspan
+          return result
+        },
+        field: childrenKey
+      })
+      console.log(mergeCells, 'mergeCells')
+      result = {
+        cells: mergeCells,
+        rowStyle,
+        rowLength: data.length
+      }
     } else {
       // 不合并
       const {

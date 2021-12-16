@@ -202,7 +202,8 @@ export class MapCreateMergeHeaderTable extends MapTable {
       mapCreateColumn,
       mapCreateData,
       merge: true, // 需要合并
-      reverse: false // 是否反转合并
+      reverse: false, // 是否反转合并
+      combin: false // 不需要组合
     }
 
     super(tableOptions)
@@ -242,7 +243,8 @@ export class MapCreateMergeHeaderTable extends MapTable {
 
   // 处理excel列
   handleExcelColumn (columns) {
-    if (columns[0].excel && isObject(columns[0].excel)) {
+    const firstColumn = columns[0]
+    if (isObject(firstColumn) && firstColumn.excel && isObject(firstColumn.excel)) {
       this.excel.columnStyle = columns.map(item => item.excel)
     }
   }
@@ -318,7 +320,8 @@ export class MapCreateMergeMainTable extends MapTable {
       mapCreateColumn,
       mapCreateData,
       merge: true, // 需要合并
-      reverse: true // 需要反转
+      reverse: true, // 需要反转
+      combin: false // 不需要组合
     }
     super(tableOptions)
     this.callhook(this, 'beforeMapCreateColumn')
@@ -348,7 +351,8 @@ export class MapCreateMergeMainTable extends MapTable {
 
   // 处理excel列
   handleExcelColumn (columns) {
-    if (columns[0].excel && isObject(columns[0].excel)) {
+    const firstColumn = columns[0]
+    if (isObject(firstColumn) && firstColumn.excel && isObject(firstColumn.excel)) {
       this.excel.columnStyle = columns.map(item => item.excel)
     }
   }
@@ -430,7 +434,8 @@ export class MapCreateNoMergeTable extends MapTable {
       mapCreateColumn,
       mapCreateData,
       merge: false, // 不需要合并
-      reverse: false // 不需要反转
+      reverse: false, // 不需要反转
+      combin: false // 不需要组合
     }
     super(tableOptions)
     this.calculate()
@@ -492,7 +497,8 @@ export class MapCreateNoMergeTable extends MapTable {
 
   // 处理excel列
   handleExcelColumn (columns) {
-    if (columns[0].excel && isObject(columns[0].excel)) {
+    const firstColumn = columns[0]
+    if (isObject(firstColumn) && firstColumn.excel && isObject(firstColumn.excel)) {
       this.excel.columnStyle = columns.map(item => item.excel)
     }
   }
@@ -554,15 +560,16 @@ export class MapCreateNoMergeTable extends MapTable {
   }
 }
 
-// 辅助创建组合(表体有的合并、有的不合并)的表格
-export class MapCreateCombinTable extends MapTable {
+// 辅助创建组合的表格
+export class MapCreateCombinMainTable extends MapTable {
   constructor(options) {
     const {
       startCol = 0,
       data = { rowList: [], columnList: [] },
       field = 'children',
       mapCreateColumn,
-      mapCreateData
+      mapCreateData,
+      spanMethod,
     } = options
     const tableOptions = {
       startCol,
@@ -570,8 +577,10 @@ export class MapCreateCombinTable extends MapTable {
       field,
       mapCreateColumn,
       mapCreateData,
+      spanMethod,
       merge: false, // 不需要合并
-      reverse: false // 不需要反转
+      reverse: false, // 不需要反转
+      combin: true // 不需要组合
     }
     super(tableOptions)
     this.calculate()
@@ -580,29 +589,49 @@ export class MapCreateCombinTable extends MapTable {
   calculate () {
     const {
       startCol,
+      spanMethod,
       data: {
         rowList,
         columnList
-      }
+      },
     } = this.options
     const mergeCells = []
+    const isCursomMerge = isFunction(spanMethod)
     for (let rowIndex = 0; rowIndex < rowList.length; rowIndex++) {
       const row = rowList[rowIndex]
-      const userRowSpan = row.rowspan
-      const userColSpan = row.colspan
-      let rowSite = rowIndex
-      let rowspan = userRowSpan && userRowSpan > 0 ? userRowSpan : 1
-
       for (let columnIndex = 0; columnIndex < columnList.length; columnIndex++) {
         const column = columnList[columnIndex]
-        let colSite = startCol + columnIndex
-        let colspan = userColSpan && userColSpan > 0 ? userColSpan : 1
-        const cell = {
-          row: rowIndex,
-          col: colSite,
-          rowspan,
-          colspan
+        const dirty = row[`_dirty${rowIndex}${columnIndex}`]
+        // 跳过已经被合并的单元格
+        if (dirty) {
+          delete row[`_dirty${rowIndex}${columnIndex}`]
+          continue
         }
+        const cell = isCursomMerge
+          ? spanMethod({
+            row,
+            column,
+            rowIndex,
+            columnIndex: startCol + columnIndex
+          })
+          : {
+            rowspan: 1,
+            colspan: 1
+          }
+        cell.row = rowIndex
+        cell.col = startCol + columnIndex
+        const dirtyRowNumber = cell.rowspan - 1
+        const dirtyColNumber = cell.colspan - 1
+        for (let i = columnIndex + 1; i <= dirtyColNumber; i++) {
+          row[`_dirty${rowIndex}${i}`] = true
+        }
+        for (let i = rowIndex + 1; i <= dirtyRowNumber; i++) {
+          const nextRow = rowList[i]
+          if (isObject(nextRow)) {
+            nextRow[`_dirty${i}${columnIndex}`] = true
+          }
+        }
+
         this.mapCreateData({
           row,
           rowIndex,
@@ -610,7 +639,6 @@ export class MapCreateCombinTable extends MapTable {
           columnIndex,
           cell
         })
-
         mergeCells.push(cell)
       }
     }
@@ -640,7 +668,8 @@ export class MapCreateCombinTable extends MapTable {
 
   // 处理excel列
   handleExcelColumn (columns) {
-    if (columns[0].excel && isObject(columns[0].excel)) {
+    const firstColumn = columns[0]
+    if (isObject(firstColumn) && firstColumn.excel && isObject(firstColumn.excel)) {
       this.excel.columnStyle = columns.map(item => item.excel)
     }
   }
@@ -701,3 +730,6 @@ export class MapCreateCombinTable extends MapTable {
     }
   }
 }
+
+
+

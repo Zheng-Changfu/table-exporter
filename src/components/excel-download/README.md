@@ -14,7 +14,7 @@
 handleExport() {
       const instance = new ElMapExportTable(
         { column, data },
-        { progress: val => this.handlePercentage(val) }// 进度条回调 
+        { progress: progress => console.log(progress) }// 进度条回调 
       );
       instance.download("导出正常表格案例");
 }
@@ -63,7 +63,7 @@ const data = [
 handleExport() {
       const instance = new ElMapExportTable(
         { column, data },
-        { progress: val => this.handlePercentage(val) }// 进度条回调 
+        { progress: progress => console.log(progress) }// 进度条回调 
       );
       instance.download("导出合并单元格的表格案例");
 }
