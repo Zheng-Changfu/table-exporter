@@ -1,6 +1,6 @@
 // 虚拟表格导出excel
 import ExcelJS from 'exceljs'
-import { getImageSuffix, isArray, isObject, noop, warn } from './util'
+import { getImageSuffix, isArray, isObject, noop, warn, isEmptyObj } from './util'
 import { STYLEMAP, TYPE2DATANAMEMAP } from './enum'
 /**
  * 时间复杂度:O(N) * O(log26^N)
@@ -195,14 +195,26 @@ export class STableExporter {
     }
   }
 
-  // 处理excel文字
+  // 处理excel文字及单元格格式
   handleValue (worksheet, cellId, cell) {
-    worksheet.getCell(cellId).value = cell.text
+    const {
+      text,
+      format = {},
+    } = cell
+    const numFmt = format.numFmt
+    const excelCell = worksheet.getCell(cellId)
+    if (numFmt !== undefined) {
+      excelCell.numFmt = numFmt
+      delete format.numFmt
+    }
+    excelCell.value = !isEmptyObj(format)
+      ? format
+      : text
   }
 
   // 处理excel单元格样式
   handleStyle (worksheet, cellId, cell, type) {
-    const { style = {}, numFmt } = cell
+    const { style = {} } = cell
     const excelCell = worksheet.getCell(cellId)
     const defaultStyle = STYLEMAP[type]
     const excelStyle = {
@@ -211,10 +223,6 @@ export class STableExporter {
     }
     for (let key in excelStyle) {
       excelCell[key] = excelStyle[key]
-    }
-    if (numFmt) {
-      // excel单元格格式
-      excelCell.numFmt = numFmt
     }
   }
 

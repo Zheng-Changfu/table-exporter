@@ -1,5 +1,4 @@
-import moment from 'moment'
-import { eachTree, noop, isFunction, isObject, hasOwnProperty } from '../excel-download/util'
+import { eachTree, noop, isFunction, isObject, hasOwnProperty, isEmptyObj } from '../excel-download/util'
 const hooks = [
   'beforeMapCreateColumn', // 创建列之前被调用
   'mapCreateColumned', // 创建列之后被调用
@@ -222,21 +221,14 @@ export class MapCreateMergeHeaderTable extends MapTable {
     }
   }
 
-  // 处理excel中的文字内容
+  // 处理excel中的文字内容/单元格格式
   handleExcelText (cell, excel) {
     if (isObject(excel)) {
-      /**
-       * excel单元格格式根据text格式决定
-       * text为字符串:excel单元格格式就是字符串
-       * text为数字:excel单元格格式就是数字
-       * text为日期:excel单元格格式就是日期
-       */
       const text = excel.text
+      const format = excel.format
       cell.text = text ? text : ''
-      if (hasOwnProperty(excel, 'format')) {
-        cell.numFmt = excel.format
-        // 等待处理
-        cell.text = moment(text).format(excel.format.toUpperCase())
+      if (!isEmptyObj(format)) {
+        cell.format = format
       }
     }
   }
@@ -362,19 +354,11 @@ export class MapCreateNoMergeTable extends MapTable {
   // 处理excel中的文字内容
   handleExcelText (cell, excel) {
     if (isObject(excel)) {
-      /**
-       * excel单元格格式根据text格式决定
-       * text为字符串:excel单元格格式就是字符串
-       * text为数字:excel单元格格式就是数字
-       * text为日期:excel单元格格式就是日期
-       */
       const text = excel.text
+      const format = excel.format
       cell.text = text ? text : ''
-
-      if (hasOwnProperty(excel, 'format')) {
-        cell.numFmt = excel.format
-        // 等待处理
-        cell.text = moment(text).format(excel.format.toUpperCase())
+      if (!isEmptyObj(format)) {
+        cell.format = format
       }
     }
   }
@@ -557,19 +541,11 @@ export class MapCreateCombinMainTable extends MapTable {
   // 处理excel中的文字内容
   handleExcelText (cell, excel) {
     if (isObject(excel)) {
-      /**
-       * excel单元格格式根据text格式决定
-       * text为字符串:excel单元格格式就是字符串
-       * text为数字:excel单元格格式就是数字
-       * text为日期:excel单元格格式就是日期
-       */
       const text = excel.text
+      const format = excel.format
       cell.text = text ? text : ''
-
-      if (hasOwnProperty(excel, 'format')) {
-        cell.numFmt = excel.format
-        // 等待处理
-        cell.text = moment(text).format(excel.format.toUpperCase())
+      if (!isEmptyObj(format)) {
+        cell.format = format
       }
     }
   }

@@ -1,9 +1,17 @@
 export const noop = () => { }
 
 export const isObject = val => Object.prototype.toString.call(val).slice(8, -1) === 'Object'
+
 export const isFunction = val => typeof val === 'function'
+
 export const isNumber = val => typeof val === 'number'
+
+export const isString = val => typeof val === 'string'
+
+export const isEmptyObj = obj => JSON.stringify(obj) === JSON.stringify({})
+
 export const isArray = val => Array.isArray(val)
+
 export const warn = val => console.warn(val)
 /**
  * @description 递归遍历树,会对源数据增加一些额外字段
@@ -46,6 +54,8 @@ export const createArray = (len, cb) => {
 }
 
 export const hasOwnProperty = (obj, prop) => Object.hasOwnProperty.call(obj, prop)
+
+export const getObjectLen = obj => Object.keys(obj).length
 
 export const getImageSuffix = url => (url.match(/(?=\.(png|jpg|jpeg|gif|webp)).*/) || [])[1]
 

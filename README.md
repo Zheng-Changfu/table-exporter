@@ -479,7 +479,83 @@ handleExport(){
 
 ## 9. 自定义 Excel 单元格格式
 
+![](/src/assets/自定义单元格格式-1.png) 
+
+![](/src/assets/自定义单元格格式-2.png) 
+
+> 提供 **setCellFormat** 函数
+>
+> 该函数接收一个参数,参数格式为对象,包含 **data (数据源)、rowIndex (当前行索引)、columnIndex (当前列索引)、type (标识当前是表头还是表体)**
+>
+> 返回值为**对象,具体可写的所有样式参考https://github.com/exceljs/exceljs/blob/master/README_zh.md#%E6%95%B0%E5%AD%97%E6%A0%BC%E5%BC%8F**
+
+```js
+# code 
+// 点击导出触发的函数内
+handleExport(){
+    const instance = new ElMapExportTable(
+        {
+            column,
+            data,
+            setCellFormat: ({ data, rowIndex, columnIndex, type }) => {
+                if (type === "header" && rowIndex === 0 && columnIndex === 0) {
+                    return {
+                        text: "我是超链接",
+                        hyperlink: "http://www.chengxiaohui.com",
+                        tooltip: "小郑同学的开发路",
+                    };
+                }
+                if (rowIndex === 1 && columnIndex === 0) {
+                    return {
+                        numFmt: "yyyy-mm-dd",
+                    };
+                }
+            },
+        },
+        { progress => console.log(progress) }
+    );
+    instance.download("自定义Excel单元格格式");
+}
+```
+
 ## 10. 设置 Excel-Sheet 样式
+
+![](/src/assets/设置Excel-Sheet样式.png) 
+
+> 提供 **setSheetStyle** 函数
+>
+> 该函数接收一个参数,参数格式为对象,包含 **sheetIndex (当前sheet索引)**
+>
+> 返回值为**对象,具体可写的所有样式参考https://github.com/exceljs/exceljs/blob/master/README_zh.md#%E6%B7%BB%E5%8A%A0%E5%B7%A5%E4%BD%9C%E8%A1%A8**
+
+```js
+# code
+// 点击导出触发的函数内
+handleExport(){
+    const instance = new ElMapExportTable(
+        {
+            column,
+            data,
+            sheetName: "~~~ 我有名字了 ~~~", // sheet名称
+            setSheetStyle: ({ sheetIndex }) => {
+                console.log(sheetIndex, "sheetIndex");
+                return {
+                    properties: { tabColor: { argb: "FFC0000" } }, // 创建带有红色标签颜色的工作表
+                    views: [
+                        {
+                            state: "frozen",
+                            xSplit: 1, // 固定1列(同表格固定列)
+                            ySplit: 1, // 固定1行(同表格固定行)
+                        },
+                    ],
+                };
+            },
+        },
+        { progress => console.log(progress) }
+    );
+    instance.download("设置Excel-Sheet样式");
+}
+```
 
 ## 11. 导出多个 Sheet 到 Excel
 

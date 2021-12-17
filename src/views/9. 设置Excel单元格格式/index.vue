@@ -75,10 +75,27 @@ export default {
         { title: "地址", dataIndex: "address" },
       ];
       const instance = new ElMapExportTable(
-        { column, data: this.tableData },
+        {
+          column,
+          data: this.tableData,
+          setCellFormat: ({ rowIndex, columnIndex, type }) => {
+            if (type === "header" && rowIndex === 0 && columnIndex === 0) {
+              return {
+                text: "我是超链接",
+                hyperlink: "http://www.chengxiaohui.com",
+                tooltip: "小郑同学的开发路",
+              };
+            }
+            if (rowIndex === 1 && columnIndex === 0) {
+              return {
+                numFmt: "yyyy-mm-dd",
+              };
+            }
+          },
+        },
         { progress: this.handlePercentage }
       );
-      instance.download("导出正常表格案例");
+      instance.download("自定义Excel单元格格式");
     },
     handlePercentage(percentage) {
       this.percentage = percentage;

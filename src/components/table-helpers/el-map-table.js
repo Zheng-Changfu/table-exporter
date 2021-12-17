@@ -12,7 +12,7 @@ export class ElMapExportTable {
   constructor(configData = {}, options = {}) {
     this.tables = []
     this.progress = options.progress
-    this.spanMethod = options.spanMethod || undefined
+    this.spanMethod = isFunction(options.spanMethod) ? options.spanMethod : undefined
     this.calculate(configData)
   }
 
@@ -26,7 +26,7 @@ export class ElMapExportTable {
       const insertData = this.handleInsertExcelHeader(config)
       const headerData = this.handleExcelHeader(config)
       const mainData = this.handleExcelMain(config, headerData.columnKeys)
-      const options = this.handleExcelSheet(config, insertData, headerData, mainData)
+      const options = this.handleExcelSheet(config.setSheetStyle, i)
       const table = {
         insertData,
         headerData,
@@ -64,6 +64,9 @@ export class ElMapExportTable {
       mapCreateData: ({ data, columnIndex, rowIndex }) => {
         const key = `${columnIndex}-field`
         const value = data[field]
+        const rowStyle = this.setRowStyle(rest.setRowStyle, { data, columnIndex, rowIndex, type: 'header' }, true)
+        const cellStyle = this.setCellStyle(rest.setCellStyle, { data, columnIndex, rowIndex, type: 'header' })
+        const cellFormat = this.setCellFormat(rest.setCellFormat, { data, columnIndex, rowIndex, type: 'header' })
         if (hasOwnProperty(data, 'dataIndex')) {
           const columnKey = data.dataIndex
           columnKeys.push(columnKey)
@@ -73,8 +76,9 @@ export class ElMapExportTable {
           value,
           excel: {
             text: value, // 预留覆盖文本
-            ...this.setRowStyle(rest.setRowStyle, { data, columnIndex, rowIndex, type: 'header' }, true),
-            ...this.setCellStyle(rest.setCellStyle, { data, columnIndex, rowIndex, type: 'header' })
+            ...rowStyle,
+            ...cellStyle,
+            ...cellFormat,
           }
         }
       },
@@ -129,13 +133,17 @@ export class ElMapExportTable {
         mapCreateData: ({ row, column, rowIndex, columnIndex }) => {
           const key = `${columnIndex}-field`
           const value = row[column]
+          const rowStyle = this.setRowStyle(rest.setRowStyle, { data: row, columnIndex, rowIndex, type: 'main' }, false)
+          const cellStyle = this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
+          const cellFormat = this.setCellFormat(rest.setCellFormat, { data: row, columnIndex, rowIndex, type: 'main' })
           return {
             key,
             value,
             excel: {
               text: value,
-              ...this.setRowStyle(rest.setRowStyle, { data: row, columnIndex, rowIndex, type: 'main' }, false),
-              ...this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
+              ...rowStyle,
+              ...cellStyle,
+              ...cellFormat,
             }
           }
         },
@@ -186,13 +194,17 @@ export class ElMapExportTable {
         mapCreateData: ({ row, column, rowIndex, columnIndex }) => {
           const key = `${columnIndex}-field`
           const value = row[column]
+          const rowStyle = this.setRowStyle(rest.setRowStyle, { data: row, columnIndex, rowIndex, type: 'main' }, false)
+          const cellStyle = this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
+          const cellFormat = this.setCellFormat(rest.setCellFormat, { data: row, columnIndex, rowIndex, type: 'main' })
           return {
             key,
             value,
             excel: {
               text: value,
-              ...this.setRowStyle(rest.setRowStyle, { data: row, columnIndex, rowIndex, type: 'main' }, false),
-              ...this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
+              ...rowStyle,
+              ...cellStyle,
+              ...cellFormat
             }
           }
         },
@@ -207,8 +219,8 @@ export class ElMapExportTable {
     return result
   }
 
-  handleExcelSheet (config, insertData, headerData, mainData) {
-    return this.setSheetStyle(config.setSheetStyle, insertData, headerData, mainData)
+  handleExcelSheet (userSetSheetStyle, sheetIndex) {
+    return this.setSheetStyle(userSetSheetStyle, { sheetIndex })
   }
 
   // 设置列样式
@@ -249,16 +261,30 @@ export class ElMapExportTable {
     return result
   }
 
-  // 设置sheet相关样式
-  setSheetStyle (userSetSheetStyle, ...rest) {
-    let style = {}
-    if (isFunction(userSetSheetStyle)) {
-      const userStyle = userSetSheetStyle({ ...rest })
-      if (isObject(userStyle)) {
-        style = userStyle
+  // 设置单元格格式(默认只会进行文本值的计算)
+  setCellFormat (userSetCellFormat, { data, columnIndex, rowIndex, type }) {
+    let result = {
+      format: {}
+    }
+    if (isFunction(userSetCellFormat)) {
+      const userFormat = userSetCellFormat({ data, columnIndex, rowIndex, type })
+      if (isObject(userFormat)) {
+        result.format = userFormat
       }
     }
-    return style
+    return result
+  }
+
+  // 设置sheet样式
+  setSheetStyle (userSetSheetStyle, { sheetIndex }) {
+    let result = {}
+    if (isFunction(userSetSheetStyle)) {
+      const userStyle = userSetSheetStyle({ sheetIndex })
+      if (isObject(userStyle)) {
+        result = userStyle
+      }
+    }
+    return result
   }
 
   // 设置插入到头部的内容

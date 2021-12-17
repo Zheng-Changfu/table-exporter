@@ -63,6 +63,21 @@ export default {
           name: "王小虎",
           address: "上海市普陀区金沙江路 1516 弄",
         },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1516 弄",
+        },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1516 弄",
+        },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1516 弄",
+        },
       ],
       percentage: 0,
     };
@@ -70,15 +85,44 @@ export default {
   methods: {
     handleExport() {
       const column = [
+        { title: "ID", dataIndex: "id" },
         { title: "日期", dataIndex: "date" },
         { title: "姓名", dataIndex: "name" },
         { title: "地址", dataIndex: "address" },
       ];
+      const data = [];
+      const time = 1000;
+      for (let i = 0; i < time; i++) {
+        data.push({
+          id: i,
+          date: "2016-05-02",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1518 弄",
+        });
+      }
+
       const instance = new ElMapExportTable(
-        { column, data: this.tableData },
+        {
+          column,
+          data,
+          sheetName: "~~~ 我有名字了 ~~~", // sheet名称
+          setSheetStyle: ({ sheetIndex }) => {
+            console.log(sheetIndex, "sheetIndex");
+            return {
+              properties: { tabColor: { argb: "FFC0000" } }, // 创建带有红色标签颜色的工作表
+              views: [
+                {
+                  state: "frozen",
+                  xSplit: 1, // 固定1列(同表格固定列)
+                  ySplit: 1, // 固定1行(同表格固定行)
+                },
+              ],
+            };
+          },
+        },
         { progress: this.handlePercentage }
       );
-      instance.download("导出正常表格案例");
+      instance.download("设置Excel-Sheet样式");
     },
     handlePercentage(percentage) {
       this.percentage = percentage;
