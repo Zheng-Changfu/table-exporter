@@ -47,5 +47,6 @@ export const createArray = (len, cb) => {
 
 export const hasOwnProperty = (obj, prop) => Object.hasOwnProperty.call(obj, prop)
 
+export const getImageSuffix = url => (url.match(/(?=\.(png|jpg|jpeg|gif|webp)).*/) || [])[1]
 
 

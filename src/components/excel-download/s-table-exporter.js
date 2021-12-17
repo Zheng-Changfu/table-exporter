@@ -1,6 +1,6 @@
 // 虚拟表格导出excel
 import ExcelJS from 'exceljs'
-import { isArray, isObject, noop, warn } from './util'
+import { getImageSuffix, isArray, isObject, noop, warn } from './util'
 import { STYLEMAP, TYPE2DATANAMEMAP } from './enum'
 /**
  * 时间复杂度:O(N) * O(log26^N)
@@ -108,7 +108,8 @@ export class STableExporter {
     this.calculateMainCells(worksheet, mainData)
     // 计算excel尾巴数据
     this.calculateFooterCells(worksheet, footerData)
-
+    // 插入背景图
+    this.insertBackgroundImage(worksheet)
   }
 
   formatData (data, type) {
@@ -247,6 +248,38 @@ export class STableExporter {
     for (let key in copyStyle) {
       excelRow[key] = copyStyle[key]
     }
+  }
+
+  async insertBackgroundImage (worksheet) {
+    try {
+      const workbook = this.workbook
+      const u = '/src/assets/导出混合表格到Excel.png'
+      const buffer = await this.requestImage(u)
+      const imageId = workbook.addImage({
+        buffer,
+        extension: getImageSuffix(u)
+      })
+      console.log(getImageSuffix(u), imageId)
+      worksheet.addBackgroundImage(imageId)
+    } catch (error) {
+      console.log(`图片请求失败:${JSON.stringify(error)}`)
+    }
+  }
+
+  requestImage (url) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.onerror = reject
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status <= 299) {
+          resolve(xhr.response)
+        }
+      }
+      // https://github.com/exceljs/exceljs/issues/1244
+      xhr.responseType = 'arraybuffer'
+      xhr.open('get', url)
+      xhr.send()
+    })
   }
 
   copyStyle (style) {
