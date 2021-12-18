@@ -4,9 +4,8 @@ import {
   mapCreateTable,
 } from '../table-helpers/helpers'
 import { STableExporter } from '../excel-download'
-import { createArray, isFunction, isObject, isNumber, hasOwnProperty } from "../excel-download/util"
+import { createArray, isFunction, isObject, isNumber, hasOwnProperty, isArray, warn } from "../excel-download/util"
 import { defaultColumnStyle, defaultThRowStyle } from '../excel-download/excel-style'
-
 
 export class ElMapExportTable {
   constructor(configData = {}, options = {}) {
@@ -23,14 +22,16 @@ export class ElMapExportTable {
     for (let i = 0; i < configLen; i++) {
       const config = configData[i]
       const sheetName = config.sheetName
-      const insertData = this.handleInsertExcelHeader(config)
+      const insertHeaderData = this.handleInsertExcelHeader(config.setInsertHeader, i)
       const headerData = this.handleExcelHeader(config)
       const mainData = this.handleExcelMain(config, headerData.columnKeys)
+      const footerData = this.handleInsertExcelFooter(config.setInsertFooter, i)
       const options = this.handleExcelSheet(config.setSheetStyle, i)
       const table = {
-        insertData,
+        insertHeaderData,
         headerData,
         mainData,
+        footerData,
         sheetName,
         options,
       }
@@ -39,8 +40,12 @@ export class ElMapExportTable {
     }
   }
 
-  handleInsertExcelHeader (config) {
-    return this.setInsertHeader(config.setInsertData)
+  handleInsertExcelHeader (userSetInsertHeader, sheetIndex) {
+    return this.setInsertHeader(userSetInsertHeader, { sheetIndex })
+  }
+
+  handleInsertExcelFooter (userSetInsertFooter, sheetIndex) {
+    return this.setInsertFooter(userSetInsertFooter, { sheetIndex })
   }
 
   handleExcelHeader (config) {
@@ -288,15 +293,62 @@ export class ElMapExportTable {
   }
 
   // 设置插入到头部的内容
-  setInsertHeader (userSetInsertHeader) {
+  setInsertHeader (userSetInsertHeader, { sheetIndex }) {
     let result = {}
     if (isFunction(userSetInsertHeader)) {
-      const userResult = userSetInsertHeader()
+      const userResult = userSetInsertHeader({ sheetIndex })
       if (isObject(userResult)) {
-        result = userResult
+        const {
+          columnStyle = [],
+          rowStyle = [],
+          cells = []
+        } = userResult
+        if (isArray(columnStyle) && isArray(rowStyle) && isArray(cells)) {
+          const { row, rowspan = 1 } = cells[cells.length - 1]
+          if (!isNumber(row) && !isNumber(rowspan)) return warn('请输入正确的参数')
+          result.columnStyle = columnStyle
+          result.rowStyle = rowStyle
+          result.cells = cells
+          result.rowLength = row + rowspan
+          this.calculateIsNeedMerge(cells)
+        }
       }
     }
     return result
+  }
+
+  // 设置插入到尾部的内容
+  setInsertFooter (userSetInsertFooter, { sheetIndex }) {
+    let result = {}
+    if (isFunction(userSetInsertFooter)) {
+      const userResult = userSetInsertFooter({ sheetIndex })
+      if (isObject(userResult)) {
+        const {
+          columnStyle = [],
+          rowStyle = [],
+          cells = []
+        } = userResult
+        if (isArray(columnStyle) && isArray(rowStyle) && isArray(cells)) {
+          const { row, rowspan = 1 } = cells[cells.length - 1]
+          if (!isNumber(row) && !isNumber(rowspan)) return warn('请输入正确的参数')
+          result.columnStyle = columnStyle
+          result.rowStyle = rowStyle
+          result.cells = cells
+          result.rowLength = row + rowspan
+          this.calculateIsNeedMerge(cells)
+        }
+      }
+    }
+    return result
+  }
+
+  // 计算是否需要合并
+  calculateIsNeedMerge (cells) {
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i]
+      const { rowspan = 1, colspan = 1 } = cell
+      cell.isNeedMerge = rowspan !== 1 || colspan !== 1
+    }
   }
 
   async download (fileName) {
@@ -308,7 +360,6 @@ export class ElMapExportTable {
     });
     await exportInstance.init();
     exportInstance.export();
-    exportInstance.download(fileName);
+    await exportInstance.download(fileName);
   }
 }
-

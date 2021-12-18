@@ -172,6 +172,7 @@ class MapTable {
         cell[key] = value
       }
       this.mapCreateData(item)
+      cell.isNeedMerge = cell.rowspan !== 1 || cell.colspan !== 1
       mergeCells.push(cell)
     }
     this.callhook(this, 'mapCreateDataed')
@@ -243,7 +244,7 @@ export class MapCreateMergeHeaderTable extends MapTable {
 
   // 处理excel行
   handleExcelRow (excel) {
-    if (isObject(excel)) {
+    if (isObject(excel) && !isEmptyObj(excel)) {
       const copyStyle = { ...excel }
       // text和format单独被handleExcelText处理
       // 单元格样式单独被handleExcelCellStyle处理
@@ -255,7 +256,9 @@ export class MapCreateMergeHeaderTable extends MapTable {
           delete copyStyle[field]
         }
       }
-      this.excel.rowStyle.push(copyStyle)
+      if (!isEmptyObj(copyStyle)) {
+        this.excel.rowStyle.push(copyStyle)
+      }
     }
   }
 
@@ -343,7 +346,7 @@ export class MapCreateNoMergeTable extends MapTable {
           columnIndex: columnIndex + startCol,
           cell
         })
-
+        cell.isNeedMerge = false
         mergeCells.push(cell)
       }
     }
@@ -384,7 +387,9 @@ export class MapCreateNoMergeTable extends MapTable {
           delete copyStyle[field]
         }
       }
-      this.excel.rowStyle.push(copyStyle)
+      if (!isEmptyObj(copyStyle)) {
+        this.excel.rowStyle.push(copyStyle)
+      }
     }
   }
 
@@ -531,6 +536,7 @@ export class MapCreateCombinMainTable extends MapTable {
           columnIndex: startCol + columnIndex,
           cell
         })
+        cell.isNeedMerge = cell.rowspan !== 1 || cell.colspan !== 1
         mergeCells.push(cell)
       }
     }
@@ -560,7 +566,7 @@ export class MapCreateCombinMainTable extends MapTable {
 
   // 处理excel行
   handleExcelRow (excel) {
-    if (isObject(excel)) {
+    if (isObject(excel) && !isEmptyObj(excel)) {
       const copyStyle = { ...excel }
       // text和format单独被handleExcelText处理
       const dirtyFields = ['text', 'style', 'format']
@@ -571,7 +577,9 @@ export class MapCreateCombinMainTable extends MapTable {
           delete copyStyle[field]
         }
       }
-      this.excel.rowStyle.push(copyStyle)
+      if (!isEmptyObj(copyStyle)) {
+        this.excel.rowStyle.push(copyStyle)
+      }
     }
   }
 

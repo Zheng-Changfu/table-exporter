@@ -90,21 +90,10 @@ export default {
         { title: "姓名", dataIndex: "name" },
         { title: "地址", dataIndex: "address" },
       ];
-      const data = [];
-      const time = 1000;
-      for (let i = 0; i < time; i++) {
-        data.push({
-          id: i,
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        });
-      }
-
       const instance = new ElMapExportTable(
         {
           column,
-          data,
+          data: this.tableData,
           sheetName: "~~~ 我有名字了 ~~~", // sheet名称
           setSheetStyle: ({ sheetIndex }) => {
             console.log(sheetIndex, "sheetIndex");

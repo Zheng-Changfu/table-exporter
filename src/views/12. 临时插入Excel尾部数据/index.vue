@@ -75,10 +75,42 @@ export default {
         { title: "地址", dataIndex: "address" },
       ];
       const instance = new ElMapExportTable(
-        { column, data: this.tableData },
+        {
+          column,
+          data: this.tableData,
+          setInsertFooter: ({ sheetIndex }) => {
+            console.log(sheetIndex);
+            return {
+              cells: [
+                {
+                  row: 0, // 内部会自动推断现在的位置，我们只需要考虑从尾部开始的位置即可
+                  col: 0,
+                  rowspan: 2, // 占2行
+                  colspan: 3, // 占3列
+                  text: "我是插入到Excel尾部的信息",
+                },
+                {
+                  row: 2,
+                  col: 0,
+                  rowspan: 3,
+                  colspan: 3,
+                  text: "我也是插入到Excel尾部的信息",
+                  style: {
+                    font: {
+                      size: 16, // 字体大小
+                      bold: true, // 字体加粗
+                      italic: true, // 字体倾斜
+                      color: { argb: "FFFF0000" }, // 字体颜色
+                    },
+                  },
+                },
+              ],
+            };
+          },
+        },
         { progress: this.handlePercentage }
       );
-      instance.download("导出正常表格案例");
+      instance.download("临时插入数据到Excel尾部");
     },
     handlePercentage(percentage) {
       this.percentage = percentage;

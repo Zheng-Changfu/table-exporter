@@ -13,6 +13,7 @@ export const isEmptyObj = obj => JSON.stringify(obj) === JSON.stringify({})
 export const isArray = val => Array.isArray(val)
 
 export const warn = val => console.warn(val)
+
 /**
  * @description 递归遍历树,会对源数据增加一些额外字段
  * @param {*} data 树形结构的数组
@@ -58,5 +59,7 @@ export const hasOwnProperty = (obj, prop) => Object.hasOwnProperty.call(obj, pro
 export const getObjectLen = obj => Object.keys(obj).length
 
 export const getImageSuffix = url => (url.match(/(?=\.(png|jpg|jpeg|gif|webp)).*/) || [])[1]
+
+export const hasWorkerByBrower = () => isFunction(window.Worker)
 
 

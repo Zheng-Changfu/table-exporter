@@ -557,14 +557,191 @@ handleExport(){
 }
 ```
 
-## 11. 导出多个 Sheet 到 Excel
+## 11. 临时插入 Excel 头部数据
 
-## 12. 临时插入 Excel 数据
+![](/src/assets/插入数据到Excel头部.png) 
 
-## 13. 导出表尾统计到 Excel
+> 提供 **setInsertHeader** 函数
+>
+> 该函数接收一个参数,参数格式为对象,包含 **sheetIndex (当前sheet索引)**
+>
+> 返回值为**对象,对象中可以写 cells (单元格信息及样式)、columnStyle (列样式)、rowStyle (行样式)**
+>
+> **注意**: 目前只支持插入数据到头部、尾部
+
+```js
+# code
+// 点击导出触发的函数内
+handleExport(){
+    const instance = new ElMapExportTable(
+        {
+            column,
+            data,
+            setInsertHeader: ({ sheetIndex }) => {
+                console.log(sheetIndex);
+                return {
+                    cells: [
+                        {
+                            row: 0,
+                            col: 0,
+                            rowspan: 2, // 占2行
+                            colspan: 3, // 占3列
+                            text: "我是插入到Excel头部的信息",
+                        },
+                        {
+                            row: 2,
+                            col: 0,
+                            rowspan: 3,
+                            colspan: 3,
+                            text: "我也是插入到Excel头部的信息",
+                            style: {
+                                font: {
+                                    size: 16, // 字体大小
+                                    bold: true, // 字体加粗
+                                    italic: true, // 字体倾斜
+                                    color: { argb: "FFFF0000" }, // 字体颜色
+                                },
+                            },
+                        },
+                    ],
+                };
+            },
+        },
+        { progress => console.log(progress) }
+    );
+    instance.download("临时插入Excel头部数据");
+}
+```
+
+## 12. 临时插入 Excel 尾部数据
+
+![](/src/assets/插入数据到Excel尾部.png) 
+
+> 和 **setInsertHeader** 同配置
+>
+> 提供 **setInsertFooter** 函数
+>
+> 该函数接收一个参数,参数格式为对象,包含 **sheetIndex (当前sheet索引)**
+>
+> 返回值为**对象,对象中可以写 cells (单元格信息及样式)、columnStyle (列样式)、rowStyle (行样式)**
+>
+> **注意**: 目前只支持插入数据到头部、尾部
+>
+> **注意**: 内部会自动推断现在的位置，我们只需要考虑从尾部开始的位置即可,位置是从**(0 row,0 col)开始**
+
+```js
+# code
+// 点击导出触发的函数内
+handleExport(){
+    const instance = new ElMapExportTable(
+        {
+            column,
+            data,
+            setInsertFooter: ({ sheetIndex }) => {
+                console.log(sheetIndex);
+                return {
+                    cells: [
+                        {
+                            row: 0,
+                            col: 0,
+                            rowspan: 2, // 占2行
+                            colspan: 3, // 占3列
+                            text: "我是插入到Excel尾部的信息",
+                        },
+                        {
+                            row: 2,
+                            col: 0,
+                            rowspan: 3,
+                            colspan: 3,
+                            text: "我也是插入到Excel尾部的信息",
+                            style: {
+                                font: {
+                                    size: 16, // 字体大小
+                                    bold: true, // 字体加粗
+                                    italic: true, // 字体倾斜
+                                    color: { argb: "FFFF0000" }, // 字体颜色
+                                },
+                            },
+                        },
+                    ],
+                };
+            },
+        },
+        { progress => console.log(progress) }
+    );
+    instance.download("临时插入数据到Excel尾部");
+}
+```
+
+## 13. 导出多个 Sheet 到 Excel
+
+![](/src/assets/导出多个sheet-1.png) 
+
+![](/src/assets/导出多个sheet-2.png) 
+
+> 传递为一个**数组**即可，数组中每一项都为一个**Sheet**,**Sheet的所有配置同之前一样**
+
+```js
+# code
+// 点击导出触发的函数内
+handleExport(){
+    const instance = new ElMapExportTable(
+        [
+            { column: column1, data: data1, sheetName: "我是Sheet1" },
+            { column: column2, data: data2, sheetName: "我是Sheet2" },
+        ],
+        { progress: this.handlePercentage }
+    );
+    instance.download("导出多个Sheet到Excel");
+}
+```
 
 ## 14. 导出大数据量表格到 Excel
 
+![](/src/assets/导出大数据量表格.png) 
+
+```js
+# code
+const instance = new ElMapExportTable(
+    { column, data },
+    { progress: val => console.log(val) }
+);
+instance.download("导出大数据量表格到Excel");
+```
+
+## 15. 设置 Excel 主题色
+
+
+
 ## 参数说明
 
+### column属性
+
+| 参数      | 说明                                                | 类型   | 默认值 |
+| --------- | --------------------------------------------------- | ------ | ------ |
+| title     | 对应的 Excel 列名,可通过 **columnKey设置**          | any    | -      |
+| dataIndex | Excel 列对应的数据源字段                            | string | ''     |
+| children  | Excel 表头分组嵌套列配置,可通过 **childrenKey设置** | array  | -      |
+
+### data属性
+
+> 显示的数据
+
+### 其他属性
+
+| 参数            | 说明                                | 类型                                                    | 默认值          |
+| --------------- | ----------------------------------- | ------------------------------------------------------- | --------------- |
+| progress        | 导出时触发的进度条方法              | Function(val)                                           | -               |
+| spanMethod      | 合并行或列的计算方法                | Function({ row, column, rowIndex, columnIndex })/Object | -               |
+| sheetName       | **Excel** 中的 **Sheet** 名称       | string                                                  | `sheet + i + 1` |
+| columnKey       | **Excel** 默认的列名配置名称        | string                                                  | title           |
+| childrenKey     | **Excel** 表头分组嵌套列名称        | string                                                  | children        |
+| setColumnStyle  | 列的 **style** 方法                 | Function({columnIndex})/Object                          | -               |
+| setRowStyle     | 行的 **style** 方法                 | Function({data,rowIndex,columnIndex,type})/Object       | -               |
+| setCellStyle    | 单元格的 **style** 方法             | Function({data,rowIndex,columnIndex,type})/Object       | -               |
+| setCellFormat   | 单元格的 **格式** 方法              | Function({data,rowIndex,columnIndex,type})/Object       | -               |
+| setSheetStyle   | **Excel** 中 **Sheet** 样式的方法   | Function({sheetIndex})/Object                           | -               |
+| setInsertHeader | 临时插入数据到 **Excel头部** 的方法 | Function({sheetIndex})/Object                           | -               |
+| setInsertFooter | 临时插入数据到 **Excel尾部** 的方法 | Function({sheetIndex})/Object                           | -               |
+| tables          | 导出多个 **table**                  | array                                                   | [{table}]       |
 

@@ -47,15 +47,15 @@ export default new VueRouter({
     },
     {
       path: '/export-table-11',
-      component: () => import('../views/11. 导出多个Sheet到Excel/index.vue'),
+      component: () => import('../views/11. 临时插入Excel头部数据/index.vue'),
     },
     {
       path: '/export-table-12',
-      component: () => import('../views/12 临时插入Excel数据/index.vue'),
+      component: () => import('../views/12. 临时插入Excel尾部数据/index.vue'),
     },
     {
       path: '/export-table-13',
-      component: () => import('../views/13. 导出表尾统计到Excel/index.vue'),
+      component: () => import('../views/13. 导出多个Sheet到Excel/index.vue'),
     },
     {
       path: '/export-table-14',

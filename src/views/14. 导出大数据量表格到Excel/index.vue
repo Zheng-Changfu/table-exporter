@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-loading="loading">
     <el-button
       type="warning"
       @click="handleExport"
@@ -42,6 +42,7 @@ export default {
   name: "ExportTable1",
   data() {
     return {
+      loading: false,
       tableData: [
         {
           date: "2016-05-02",
@@ -69,19 +70,37 @@ export default {
   },
   methods: {
     handleExport() {
-      const column = [
-        { title: "日期", dataIndex: "date" },
-        { title: "姓名", dataIndex: "name" },
-        { title: "地址", dataIndex: "address" },
-      ];
-      const instance = new ElMapExportTable(
-        { column, data: this.tableData },
-        { progress: this.handlePercentage }
-      );
-      instance.download("导出正常表格案例");
-    },
-    handlePercentage(percentage) {
-      this.percentage = percentage;
+      const data = [];
+      const dataTime = 10000;
+      this.loading = true;
+      setTimeout(async () => {
+        for (let i = 0; i < dataTime; i++) {
+          data.push({
+            id: i + 1,
+            date: "2016-05-02",
+            name: "王小虎",
+            address: "上海市普陀区金沙江路 1518 弄",
+          });
+        }
+        const column = [];
+        const columnInfoMap = {
+          0: { title: "ID", dataIndex: "id" },
+          1: { title: "日期", dataIndex: "date" },
+          2: { title: "姓名", dataIndex: "name" },
+          3: { title: "地址", dataIndex: "address" },
+        };
+        const columnTime = 100;
+        for (let i = 0; i < columnTime; i++) {
+          const columnInfo = columnInfoMap[i % 4];
+          column.push({ ...columnInfo });
+        }
+        const instance = new ElMapExportTable(
+          { column, data },
+          { progress: this.handlePercentage }
+        );
+        await instance.download("导出大数据量表格到Excel");
+        this.loading = false;
+      }, 1000);
     },
   },
 };
