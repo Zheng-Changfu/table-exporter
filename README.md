@@ -2,6 +2,10 @@
 
 > 使用前端 **table** 结构, 导出 **excel** 结构, 基于 **exceljs + file-saver**
 
+```bash
+npm install table-excel
+```
+
 ## 1. 导出正常表格到 Excel 
 
 ![](/public/assets/导出正常表格-2.png) 
