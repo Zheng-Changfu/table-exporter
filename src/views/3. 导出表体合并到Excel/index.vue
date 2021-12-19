@@ -139,9 +139,9 @@ export default {
         },
       ];
       const instance = new ElMapExportTable(
-        { column, data },
         {
-          progress: this.handlePercentage,
+          column,
+          data,
           spanMethod: ({ rowIndex, columnIndex }) => {
             if (columnIndex === 0) {
               if (rowIndex % 2 === 0) {
@@ -152,7 +152,8 @@ export default {
               }
             }
           },
-        }
+        },
+        { progress: this.handlePercentage }
       );
       instance.download("导出表体合并案例");
     },

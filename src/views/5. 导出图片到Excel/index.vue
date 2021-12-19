@@ -47,6 +47,11 @@ export default {
           date: "2016-05-02",
           name: "王小虎",
           address: "上海市普陀区金沙江路 1518 弄",
+          images: [
+            "/assets/插入数据到Excel尾部.png",
+            "/assets/插入数据到Excel尾部.png",
+            "/assets/插入数据到Excel尾部.png",
+          ],
         },
         {
           date: "2016-05-04",
@@ -72,13 +77,23 @@ export default {
       const column = [
         { title: "日期", dataIndex: "date" },
         { title: "姓名", dataIndex: "name" },
+        { title: "图片", dataIndex: "images" },
         { title: "地址", dataIndex: "address" },
       ];
       const instance = new ElMapExportTable(
-        { column, data: this.tableData },
+        {
+          column,
+          data: this.tableData,
+          setImageStyle: ({ data, rowIndex, columnIndex, type }) => {
+            return {
+              width: 100,
+              height: 100,
+            };
+          },
+        },
         { progress: this.handlePercentage }
       );
-      instance.download("导出正常表格案例");
+      instance.download("导出图片到Excel案例");
     },
     handlePercentage(percentage) {
       this.percentage = percentage;

@@ -11,7 +11,7 @@ export class ElMapExportTable {
   constructor(configData = {}, options = {}) {
     this.tables = []
     this.progress = options.progress
-    this.spanMethod = isFunction(options.spanMethod) ? options.spanMethod : undefined
+    this.spanMethod = isFunction(configData.spanMethod) ? configData.spanMethod : undefined
     this.calculate(configData)
   }
 
@@ -71,6 +71,7 @@ export class ElMapExportTable {
         const value = data[field]
         const rowStyle = this.setRowStyle(rest.setRowStyle, { data, columnIndex, rowIndex, type: 'header' }, true)
         const cellStyle = this.setCellStyle(rest.setCellStyle, { data, columnIndex, rowIndex, type: 'header' })
+        const imageStyle = this.setImageStyle(rest.setImageStyle, { data, columnIndex, rowIndex, type: 'header' })
         const cellFormat = this.setCellFormat(rest.setCellFormat, { data, columnIndex, rowIndex, type: 'header' })
         if (hasOwnProperty(data, 'dataIndex')) {
           const columnKey = data.dataIndex
@@ -84,6 +85,7 @@ export class ElMapExportTable {
             ...rowStyle,
             ...cellStyle,
             ...cellFormat,
+            ...imageStyle
           }
         }
       },
@@ -140,6 +142,7 @@ export class ElMapExportTable {
           const value = row[column]
           const rowStyle = this.setRowStyle(rest.setRowStyle, { data: row, columnIndex, rowIndex, type: 'main' }, false)
           const cellStyle = this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
+          const imageStyle = this.setImageStyle(rest.setImageStyle, { data: row, columnIndex, rowIndex, type: 'main' })
           const cellFormat = this.setCellFormat(rest.setCellFormat, { data: row, columnIndex, rowIndex, type: 'main' })
           return {
             key,
@@ -149,6 +152,7 @@ export class ElMapExportTable {
               ...rowStyle,
               ...cellStyle,
               ...cellFormat,
+              ...imageStyle,
             }
           }
         },
@@ -201,6 +205,7 @@ export class ElMapExportTable {
           const value = row[column]
           const rowStyle = this.setRowStyle(rest.setRowStyle, { data: row, columnIndex, rowIndex, type: 'main' }, false)
           const cellStyle = this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
+          const imageStyle = this.setImageStyle(rest.setImageStyle, { data: row, columnIndex, rowIndex, type: 'main' })
           const cellFormat = this.setCellFormat(rest.setCellFormat, { data: row, columnIndex, rowIndex, type: 'main' })
           return {
             key,
@@ -209,7 +214,8 @@ export class ElMapExportTable {
               text: value,
               ...rowStyle,
               ...cellStyle,
-              ...cellFormat
+              ...cellFormat,
+              ...imageStyle,
             }
           }
         },
@@ -275,6 +281,20 @@ export class ElMapExportTable {
       const userFormat = userSetCellFormat({ data, columnIndex, rowIndex, type })
       if (isObject(userFormat)) {
         result.format = userFormat
+      }
+    }
+    return result
+  }
+
+  // 设置图片样式
+  setImageStyle (userSetImageStyle, { data, columnIndex, rowIndex, type }) {
+    let result = {
+      image: {}
+    }
+    if (isFunction(userSetImageStyle)) {
+      const userImageStyle = userSetImageStyle({ data, columnIndex, rowIndex, type })
+      if (isObject(userImageStyle)) {
+        result.image = userImageStyle
       }
     }
     return result
@@ -356,10 +376,10 @@ export class ElMapExportTable {
     const progress = this.progress
     const exportInstance = new STableExporter({
       progress,
-      tables: tables
+      tables: tables,
     });
     await exportInstance.init();
-    exportInstance.export();
-    await exportInstance.download(fileName);
+    await exportInstance.export();
+    exportInstance.download(fileName)
   }
 }

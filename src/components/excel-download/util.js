@@ -58,7 +58,7 @@ export const hasOwnProperty = (obj, prop) => Object.hasOwnProperty.call(obj, pro
 
 export const getObjectLen = obj => Object.keys(obj).length
 
-export const getImageSuffix = url => (url.match(/(?=\.(png|jpg|jpeg|gif|webp)).*/) || [])[1]
+export const getImageSuffix = url => (url.match(/data:image\/(.*);base64/) || [])[1]
 
 export const hasWorkerByBrower = () => isFunction(window.Worker)
 

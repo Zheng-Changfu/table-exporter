@@ -1,4 +1,5 @@
-import { eachTree, noop, isFunction, isObject, hasOwnProperty, isEmptyObj } from '../excel-download/util'
+import { eachTree, noop, isFunction, isObject, hasOwnProperty, isEmptyObj, isArray } from '../excel-download/util'
+// 预留
 const hooks = [
   'beforeMapCreateColumn', // 创建列之前被调用
   'mapCreateColumned', // 创建列之后被调用
@@ -231,6 +232,11 @@ export class MapCreateMergeHeaderTable extends MapTable {
       if (!isEmptyObj(format)) {
         cell.format = format
       }
+      if (isArray(text)) {
+        // 标识图片字段
+        cell.isImage = true
+        cell.image = excel.image
+      }
     }
   }
 
@@ -362,6 +368,11 @@ export class MapCreateNoMergeTable extends MapTable {
       cell.text = text ? text : ''
       if (!isEmptyObj(format)) {
         cell.format = format
+      }
+      if (isArray(text)) {
+        // 标识图片字段
+        cell.isImage = true
+        cell.image = excel.image
       }
     }
   }
@@ -552,6 +563,11 @@ export class MapCreateCombinMainTable extends MapTable {
       cell.text = text ? text : ''
       if (!isEmptyObj(format)) {
         cell.format = format
+      }
+      if (isArray(text)) {
+        // 标识图片字段
+        cell.isImage = true
+        cell.image = excel.image
       }
     }
   }

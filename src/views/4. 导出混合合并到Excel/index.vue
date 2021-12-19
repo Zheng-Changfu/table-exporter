@@ -108,9 +108,9 @@ export default {
         },
       ];
       const instance = new ElMapExportTable(
-        { column, data },
         {
-          progress: this.handlePercentage,
+          column,
+          data,
           spanMethod: ({ rowIndex, columnIndex }) => {
             if (columnIndex === 0 && rowIndex === 0) {
               return {
@@ -137,7 +137,8 @@ export default {
               };
             }
           },
-        }
+        },
+        { progress: this.handlePercentage }
       );
       instance.download("导出混合合并到Excel");
     },
