@@ -11,6 +11,18 @@ npm install table-excel
 - [导出正常表格到 Excel](#1)
 - [导出表头合并到 Excel](#2)
 - [导出表体合并到 Excel](#3)
+- [导出混合合并到 Excel](#4)
+- [导出树形表格到 Excel](#5)
+- [导出图片到 Excel](#6)
+- [设置 Excel 的列样式](#7)
+- [设置 Excel 的行样式](#8)
+- [设置 Excel 的单元格样式](#9)
+- [自定义 Excel 单元格格式](#10)
+- [设置 Excel-Sheet 样式](#11)
+- [临时插入 Excel 头部数据](#12)
+- [临时插入 Excel 尾部数据](#13)
+- [导出多个 Sheet 到 Excel](#14)
+- [导出大数据量表格到 Excel](#15)
 
 ## <h2 id="1">1. 导出正常表格到 Excel </h2>
 
@@ -63,7 +75,7 @@ const data = [
 ]
 ```
 
-## <h2>2. 导出表头合并到 Excel </h2>
+## <h2 id="2">2. 导出表头合并到 Excel </h2>
 
 ![](/public/assets/导出表头合并表格-2.png) 
 
