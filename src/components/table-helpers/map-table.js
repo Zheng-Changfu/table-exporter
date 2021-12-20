@@ -254,7 +254,7 @@ export class MapCreateMergeHeaderTable extends MapTable {
       const copyStyle = { ...excel }
       // text和format单独被handleExcelText处理
       // 单元格样式单独被handleExcelCellStyle处理
-      const dirtyFields = ['text', 'style', 'format']
+      const dirtyFields = ['text', 'style', 'format', 'image']
       const dirtyFieldsLen = dirtyFields.length
       for (let i = 0; i < dirtyFieldsLen; i++) {
         const field = dirtyFields[i]
@@ -390,7 +390,7 @@ export class MapCreateNoMergeTable extends MapTable {
     if (isObject(excel)) {
       const copyStyle = { ...excel }
       // text和format单独被handleExcelText处理
-      const dirtyFields = ['text', 'style', 'format']
+      const dirtyFields = ['text', 'style', 'format', 'image']
       const dirtyFieldsLen = dirtyFields.length
       for (let i = 0; i < dirtyFieldsLen; i++) {
         const field = dirtyFields[i]
@@ -585,7 +585,7 @@ export class MapCreateCombinMainTable extends MapTable {
     if (isObject(excel) && !isEmptyObj(excel)) {
       const copyStyle = { ...excel }
       // text和format单独被handleExcelText处理
-      const dirtyFields = ['text', 'style', 'format']
+      const dirtyFields = ['text', 'style', 'format', 'image']
       const dirtyFieldsLen = dirtyFields.length
       for (let i = 0; i < dirtyFieldsLen; i++) {
         const field = dirtyFields[i]

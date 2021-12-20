@@ -4,7 +4,7 @@ import {
   mapCreateTable,
 } from '../table-helpers/helpers'
 import { STableExporter } from '../excel-download'
-import { createArray, isFunction, isObject, isNumber, hasOwnProperty, isArray, warn } from "../excel-download/util"
+import { createArray, isFunction, isObject, isNumber, hasOwnProperty, isArray, warn, flatTree } from "../excel-download/util"
 import { defaultColumnStyle, defaultThRowStyle } from '../excel-download/excel-style'
 
 export class ElMapExportTable {
@@ -12,6 +12,7 @@ export class ElMapExportTable {
     this.tables = []
     this.progress = options.progress
     this.spanMethod = isFunction(configData.spanMethod) ? configData.spanMethod : undefined
+    this.indentSize = options.indentSize || 1
     this.calculate(configData)
   }
 
@@ -112,9 +113,12 @@ export class ElMapExportTable {
     let {
       data: userData = [],
       childrenKey = 'children',
+      treeNode = false, // 是否为树形结构
+      treeField = columnKeys[0], // 哪一列为树形结构，默认第一列
       ...rest
     } = config
     let result = null
+    const indentSize = this.indentSize
     const spanMethod = this.spanMethod
     const isCombin = spanMethod && isFunction(spanMethod)
     if (isCombin) {
@@ -190,7 +194,7 @@ export class ElMapExportTable {
         }
       } = mapCreateTable({
         data: {
-          rowList: userData,
+          rowList: treeNode ? flatTree(userData, childrenKey) : userData,
           columnList: columnKeys
         },
         mapCreateColumn: ({ columnLen }) => {
@@ -207,6 +211,10 @@ export class ElMapExportTable {
           const cellStyle = this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
           const imageStyle = this.setImageStyle(rest.setImageStyle, { data: row, columnIndex, rowIndex, type: 'main' })
           const cellFormat = this.setCellFormat(rest.setCellFormat, { data: row, columnIndex, rowIndex, type: 'main' })
+          if (treeNode && treeField === column) {
+            // 设置树形结构的缩进样式
+            this.setTreeIndentStyle(row, cellStyle, indentSize)
+          }
           return {
             key,
             value,
@@ -284,6 +292,22 @@ export class ElMapExportTable {
       }
     }
     return result
+  }
+
+  // 设置树形结构的单元格样式(内部控制,向外暴露indentSize)
+  setTreeIndentStyle (row, cellStyle, indentSize) {
+    const userStyle = cellStyle.style.alignment || {}
+    const level = row.$level // flatTree中添加的$level
+    const indent = (level - 1) * indentSize
+    const alignment = {
+      indent,
+      vertical: 'middle',
+      wrapText: true
+    }
+    cellStyle.style.alignment = {
+      ...userStyle,
+      ...alignment
+    }
   }
 
   // 设置图片样式

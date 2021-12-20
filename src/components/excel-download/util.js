@@ -54,6 +54,25 @@ export const createArray = (len, cb) => {
   });
 }
 
+// 扁平化树,增加level字段
+export const flatTree = (data, field = 'children', level = 1) => {
+  let result = []
+  for (let i = 0; i < data.length; i++) {
+    const item = data[i]
+    const children = item[field]
+    const hasChildren = children && children.length > 0
+    item.$level = level
+    result.push(item)
+    if (hasChildren) {
+      delete item[field]
+      result = result.concat(
+        flatTree(children, field, level + 1)
+      )
+    }
+  }
+  return result
+}
+
 export const hasOwnProperty = (obj, prop) => Object.hasOwnProperty.call(obj, prop)
 
 export const getObjectLen = obj => Object.keys(obj).length

@@ -61,5 +61,9 @@ export default new VueRouter({
       path: '/export-table-14',
       component: () => import('../views/14. 导出大数据量表格到Excel/index.vue'),
     },
+    {
+      path: '/export-table-15',
+      component: () => import('../views/15. 导出树形结构表格到Excel/index.vue'),
+    },
   ]
 })
