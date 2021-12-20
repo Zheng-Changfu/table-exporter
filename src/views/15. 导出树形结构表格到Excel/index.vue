@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { ElMapExportTable } from "table-excel/table-helpers/el-map-table";
+import { ElMapExportTable } from "table-excel";
 export default {
   name: "ExportTable1",
   data() {
