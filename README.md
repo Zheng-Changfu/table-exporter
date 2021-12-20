@@ -4,6 +4,7 @@
 
 ```bash
 npm install table-excel
+import { ElMapExportTable } from "table-excel/table-helpers/el-map-table";
 ```
 
 # 目录
