@@ -69,38 +69,34 @@ export default {
     };
   },
   methods: {
-    handleExport() {
+    async handleExport() {
       const data = [];
-      const dataTime = 10000;
-      this.loading = true;
-      setTimeout(async () => {
-        for (let i = 0; i < dataTime; i++) {
-          data.push({
-            id: i + 1,
-            date: "2016-05-02",
-            name: "王小虎",
-            address: "上海市普陀区金沙江路 1518 弄",
-          });
-        }
-        const column = [];
-        const columnInfoMap = {
-          0: { title: "ID", dataIndex: "id" },
-          1: { title: "日期", dataIndex: "date" },
-          2: { title: "姓名", dataIndex: "name" },
-          3: { title: "地址", dataIndex: "address" },
-        };
-        const columnTime = 100;
-        for (let i = 0; i < columnTime; i++) {
-          const columnInfo = columnInfoMap[i % 4];
-          column.push({ ...columnInfo });
-        }
-        const instance = new ElMapExportTable(
-          { column, data },
-          { progress: this.handlePercentage }
-        );
-        await instance.download("导出大数据量表格到Excel");
-        this.loading = false;
-      }, 1000);
+      const dataTime = 100000;
+      for (let i = 0; i < dataTime; i++) {
+        data.push({
+          id: i + 1,
+          date: "2016-05-02",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1518 弄",
+        });
+      }
+      const column = [];
+      const columnInfoMap = {
+        0: { title: "ID", dataIndex: "id" },
+        1: { title: "日期", dataIndex: "date" },
+        2: { title: "姓名", dataIndex: "name" },
+        3: { title: "地址", dataIndex: "address" },
+      };
+      const columnTime = 6;
+      for (let i = 0; i < columnTime; i++) {
+        const columnInfo = columnInfoMap[i % 4];
+        column.push({ ...columnInfo });
+      }
+      const instance = new ElMapExportTable({ column, data });
+      await instance.download("导出大数据量表格到Excel");
+    },
+    handlePercentage(percentage) {
+      this.percentage = percentage;
     },
   },
 };

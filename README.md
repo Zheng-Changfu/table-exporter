@@ -1,6 +1,7 @@
 # Table-Exporter
 
-> 使用前端 **table** 结构, 导出 **excel** 结构, 基于 **exceljs + file-saver**
+> 将前端 **table** 导出 **excel** , 基于 **exceljs + file-saver** , 适用于所有表格
+> 基于 **数据源的定制化导出**
 
 ```bash
 npm install table-excel
@@ -27,7 +28,7 @@ import { ElMapExportTable } from "table-excel";
 
 ## <h2 id="1">1. 导出正常表格到 Excel </h2>
 
-![](/public/assets/导出正常表格-2.png) 
+![](/public/assets/导出正常表格-2.png)
 
 > 正常按表格格式书写 **column 和 data, dataIndex 为对应数据源的字段**
 >
@@ -78,7 +79,7 @@ const data = [
 
 ## <h2 id="2">2. 导出表头合并到 Excel </h2>
 
-![](/public/assets/导出表头合并表格-2.png) 
+![](/public/assets/导出表头合并表格-2.png)
 
 > 表头的合并，将对应的**列设置成相应的树形结构**
 >
@@ -178,7 +179,7 @@ const data = [
 
 ## <h2 id="3">3. 导出表体合并到 Excel</h2>
 
-![](/public/assets/导出表体合并表格-2.png) 
+![](/public/assets/导出表体合并表格-2.png)
 
 > 表体的合并，指定 **spanMethod**函数，该函数接收 **4 个参数**，返回值为**对象格式,可写参数为 rowspan、colspan**
 >
@@ -267,7 +268,7 @@ const data = [
 
 ## <h2 id="4">4. 导出混合合并到 Excel</h2>
 
-![](/public/assets/导出混合表格到Excel.png) 
+![](/public/assets/导出混合表格到Excel.png)
 
 > 混合合并，需要结合**表头合并 + 表体合并即可**
 
@@ -276,7 +277,7 @@ const data = [
 // 点击导出触发的函数
 handleExport() {
       const instance = new ElMapExportTable(
-        { 
+        {
             column,
             data,
             spanMethod: ({ rowIndex, columnIndex }) => {
@@ -401,7 +402,7 @@ const data = [
 
 ## <h2 id="5">5. 导出树形表格到 Excel</h2>
 
-![](/public/assets/导出树形表格.png) 
+![](/public/assets/导出树形表格.png)
 
 > 支持树形数据的导出,当数据中有 **children** 字段时会标记为树形的 **Excel** 如果不需要或配置为其他字段可以用 **childrenKey** 进行配置
 >
@@ -418,13 +419,13 @@ const data = [
 // 点击导出触发的函数
 handleExport() {
     const instance = new ElMapExportTable(
-        { 
+        {
             column,
             data,
             treeNode:true,
             treeField: "name",
         },
-        { 
+        {
             progress: progress => console.log(progress),
             indentSize: 1, // 默认是1,可自行调整
         }
@@ -525,13 +526,13 @@ const data = [
 
 ## <h2 id="6">6. 导出图片到 Excel</h2>
 
-![](/public/assets/导出图片到Excel.png) 
+![](/public/assets/导出图片到Excel.png)
 
-> 将 **dataIndex对应的数据源设置成数组结构即可**
+> 将 **dataIndex 对应的数据源设置成数组结构即可**
 >
-> 另外对于图片的样式(目前只支持设置图片宽高)提供了 **setImageStyle 函数** ,参数格式为对象,包含 **data (数据源)、rowIndex (当前行索引)、columnIndex (当前列索引)、type (标识当前是表头还是表体)****
+> 另外对于图片的样式(目前只支持设置图片宽高)提供了 **setImageStyle 函数** ,参数格式为对象,包含 **data (数据源)、rowIndex (当前行索引)、columnIndex (当前列索引)、type (标识当前是表头还是表体)\*\***
 >
-> 注意：数组中每一项都为 **图片url路径,错误路径会导致请求失败，保证图片路径和当前项目是同源，否则会导致跨域**
+> 注意：数组中每一项都为 **图片 url 路径,错误路径会导致请求失败，保证图片路径和当前项目是同源，否则会导致跨域**
 
 ```js
 # code
@@ -593,7 +594,7 @@ const data = [
 
 ## <h2 id="7">7. 设置 Excel 的列样式</h2>
 
-![](/public/assets/设置Excel的列样式.png) 
+![](/public/assets/设置Excel的列样式.png)
 
 > 提供 **setColumnStyle 函数, 该函数接收一个参数,参数格式为对象,包含 columnIndex (当前列索引)**
 >
@@ -621,7 +622,7 @@ handleExport(){
 
 ## <h2 id="8">8. 设置 Excel 的行样式</h2>
 
-![](/public/assets/设置Excel的行样式.png) 
+![](/public/assets/设置Excel的行样式.png)
 
 提供 **setRowStyle** 函数
 
@@ -654,7 +655,7 @@ handleExport(){
 
 ## <h2 id="9">9. 设置 Execl 的单元格样式</h2>
 
-![](/public/assets/设置Excel的单元格样式.png) 
+![](/public/assets/设置Excel的单元格样式.png)
 
 > 提供 **setCellStyle** 函数
 >
@@ -696,9 +697,9 @@ handleExport(){
 
 ## <h2 id="10">10. 自定义 Excel 单元格格式</h2>
 
-![](/public/assets/自定义单元格格式-1.png) 
+![](/public/assets/自定义单元格格式-1.png)
 
-![](/public/assets/自定义单元格格式-2.png) 
+![](/public/assets/自定义单元格格式-2.png)
 
 > 提供 **setCellFormat** 函数
 >
@@ -707,7 +708,7 @@ handleExport(){
 > 返回值为**对象,具体可写的所有样式参考https://github.com/exceljs/exceljs/blob/master/README_zh.md#%E6%95%B0%E5%AD%97%E6%A0%BC%E5%BC%8F**
 
 ```js
-# code 
+# code
 // 点击导出触发的函数内
 handleExport(){
     const instance = new ElMapExportTable(
@@ -737,11 +738,11 @@ handleExport(){
 
 ## <h2 id="11">11. 设置 Excel-Sheet 样式</h2>
 
-![](/public/assets/设置Excel-Sheet样式.png) 
+![](/public/assets/设置Excel-Sheet样式.png)
 
 > 提供 **setSheetStyle** 函数
 >
-> 该函数接收一个参数,参数格式为对象,包含 **sheetIndex (当前sheet索引)**
+> 该函数接收一个参数,参数格式为对象,包含 **sheetIndex (当前 sheet 索引)**
 >
 > 返回值为**对象,具体可写的所有样式参考https://github.com/exceljs/exceljs/blob/master/README_zh.md#%E6%B7%BB%E5%8A%A0%E5%B7%A5%E4%BD%9C%E8%A1%A8**
 
@@ -776,11 +777,11 @@ handleExport(){
 
 ## <h2 id="12">12. 临时插入 Excel 头部数据</h2>
 
-![](/public/assets/插入数据到Excel头部.png) 
+![](/public/assets/插入数据到Excel头部.png)
 
 > 提供 **setInsertHeader** 函数
 >
-> 该函数接收一个参数,参数格式为对象,包含 **sheetIndex (当前sheet索引)**
+> 该函数接收一个参数,参数格式为对象,包含 **sheetIndex (当前 sheet 索引)**
 >
 > 返回值为**对象,对象中可以写 cells (单元格信息及样式)、columnStyle (列样式)、rowStyle (行样式)**
 >
@@ -832,13 +833,13 @@ handleExport(){
 
 ## <h2 id="13">13. 临时插入 Excel 尾部数据</h2>
 
-![](/public/assets/插入数据到Excel尾部.png) 
+![](/public/assets/插入数据到Excel尾部.png)
 
 > 和 **setInsertHeader** 同配置
 >
 > 提供 **setInsertFooter** 函数
 >
-> 该函数接收一个参数,参数格式为对象,包含 **sheetIndex (当前sheet索引)**
+> 该函数接收一个参数,参数格式为对象,包含 **sheetIndex (当前 sheet 索引)**
 >
 > 返回值为**对象,对象中可以写 cells (单元格信息及样式)、columnStyle (列样式)、rowStyle (行样式)**
 >
@@ -892,11 +893,11 @@ handleExport(){
 
 ## <h2 id="14">14. 导出多个 Sheet 到 Excel</h2>
 
-![](/public/assets/导出多个sheet-1.png) 
+![](/public/assets/导出多个sheet-1.png)
 
-![](/public/assets/导出多个sheet-2.png) 
+![](/public/assets/导出多个sheet-2.png)
 
-> 传递为一个**数组**即可，数组中每一项都为一个**Sheet**,**Sheet的所有配置同之前一样**
+> 传递为一个**数组**即可，数组中每一项都为一个**Sheet**,**Sheet 的所有配置同之前一样**
 
 ```js
 # code
@@ -915,11 +916,9 @@ handleExport(){
 
 ## <h2 id="15">15. 导出大数据量表格到 Excel</h2>
 
-![](/public/assets/导出大数据量表格.png) 
+![](/public/assets/导出大数据量表格.png)
 
-> 目前在小于 **70W** 条总数据时，导出比较快
->
-> 后续考虑增加 **web-worker机制** 来处理大数据量
+> **10W 条数据** 耗时 **4s 左右**,不同电脑不同速度
 
 ```js
 # code
@@ -932,36 +931,36 @@ instance.download("导出大数据量表格到Excel");
 
 ## 参数说明
 
-### column属性
+### column 属性
 
-| 参数      | 说明                                                | 类型   | 默认值 |
-| --------- | --------------------------------------------------- | ------ | ------ |
-| title     | 对应的 Excel 列名,可通过 **columnKey设置**          | any    | -      |
-| dataIndex | Excel 列对应的数据源字段                            | string | ''     |
-| children  | Excel 表头分组嵌套列配置,可通过 **childrenKey设置** | array  | -      |
+| 参数      | 说明                                                 | 类型   | 默认值 |
+| --------- | ---------------------------------------------------- | ------ | ------ |
+| title     | 对应的 Excel 列名,可通过 **columnKey 设置**          | any    | -      |
+| dataIndex | Excel 列对应的数据源字段                             | string | ''     |
+| children  | Excel 表头分组嵌套列配置,可通过 **childrenKey 设置** | array  | -      |
 
-### data属性
+### data 属性
 
 > 显示的数据
 
 ### 其他属性
 
-| 参数            | <div style="width:200">说明</div>                            | 类型                                                    | 默认值                 |
-| --------------- | ------------------------------------------------------------ | ------------------------------------------------------- | ---------------------- |
-| progress        | 导出时触发的进度条方法                                       | Function(val)                                           | -                      |
-| treeNode        | 标识导出后是否以 **树形结构** 展示                           | boolean                                                 | false                  |
+| 参数            | <div style="width:200">说明</div>                                                          | 类型                                                    | 默认值                 |
+| --------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------- | ---------------------- |
+| progress        | 导出时触发的进度条方法                                                                     | Function(val)                                           | -                      |
+| treeNode        | 标识导出后是否以 **树形结构** 展示                                                         | boolean                                                 | false                  |
 | treeField       | 默认会取第一列的字段作为 **树形结构展示**，如果是其他列可以用 **treeField** 字段来指定列名 | string                                                  | 第一列的字段           |
-| indentSize      | 控制 **树形结构的层级缩进**                                  | number                                                  | 1                      |
-| spanMethod      | 合并行或列的计算方法                                         | Function({ row, column, rowIndex, columnIndex })/Object | -                      |
-| sheetName       | **Excel** 中的 **Sheet** 名称                                | string                                                  | `sheet + i + 1`        |
-| columnKey       | **Excel** 默认的列名配置名称                                 | string                                                  | title                  |
-| childrenKey     | **Excel** 表头分组嵌套列/树形结构子节点 名称                 | string                                                  | children               |
-| setColumnStyle  | 列的 **style** 方法                                          | Function({columnIndex})/Object                          | -                      |
-| setRowStyle     | 行的 **style** 方法                                          | Function({data,rowIndex,columnIndex,type})/Object       | -                      |
-| setCellStyle    | 单元格的 **style** 方法                                      | Function({data,rowIndex,columnIndex,type})/Object       | -                      |
-| setImageStyle   | 图片的 **style** 方法                                        | Function({data,rowIndex,columnIndex,type})/Object       | {width:100,height:100} |
-| setCellFormat   | 单元格的 **格式** 方法                                       | Function({data,rowIndex,columnIndex,type})/Object       | -                      |
-| setSheetStyle   | **Excel** 中 **Sheet** 样式的方法                            | Function({sheetIndex})/Object                           | -                      |
-| setInsertHeader | 临时插入数据到 **Excel头部** 的方法                          | Function({sheetIndex})/Object                           | -                      |
-| setInsertFooter | 临时插入数据到 **Excel尾部** 的方法                          | Function({sheetIndex})/Object                           | -                      |
-| tables          | 导出多个 **table**                                           | array                                                   | [{table}]              |
+| indentSize      | 控制 **树形结构的层级缩进**                                                                | number                                                  | 1                      |
+| spanMethod      | 合并行或列的计算方法                                                                       | Function({ row, column, rowIndex, columnIndex })/Object | -                      |
+| sheetName       | **Excel** 中的 **Sheet** 名称                                                              | string                                                  | `sheet + i + 1`        |
+| columnKey       | **Excel** 默认的列名配置名称                                                               | string                                                  | title                  |
+| childrenKey     | **Excel** 表头分组嵌套列/树形结构子节点 名称                                               | string                                                  | children               |
+| setColumnStyle  | 列的 **style** 方法                                                                        | Function({columnIndex})/Object                          | -                      |
+| setRowStyle     | 行的 **style** 方法                                                                        | Function({data,rowIndex,columnIndex,type})/Object       | -                      |
+| setCellStyle    | 单元格的 **style** 方法                                                                    | Function({data,rowIndex,columnIndex,type})/Object       | -                      |
+| setImageStyle   | 图片的 **style** 方法                                                                      | Function({data,rowIndex,columnIndex,type})/Object       | {width:100,height:100} |
+| setCellFormat   | 单元格的 **格式** 方法                                                                     | Function({data,rowIndex,columnIndex,type})/Object       | -                      |
+| setSheetStyle   | **Excel** 中 **Sheet** 样式的方法                                                          | Function({sheetIndex})/Object                           | -                      |
+| setInsertHeader | 临时插入数据到 **Excel 头部** 的方法                                                       | Function({sheetIndex})/Object                           | -                      |
+| setInsertFooter | 临时插入数据到 **Excel 尾部** 的方法                                                       | Function({sheetIndex})/Object                           | -                      |
+| tables          | 导出多个 **table**                                                                         | array                                                   | [{table}]              |

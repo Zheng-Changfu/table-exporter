@@ -1,6 +1,6 @@
 // 虚拟表格导出excel
 import ExcelJS from 'exceljs'
-import { getImageSuffix, isArray, isObject, noop, warn, isEmptyObj, createArray } from './util'
+import { getImageSuffix, isArray, isObject, noop, warn, isEmptyObj } from './util'
 import { STYLEMAP, TYPE2DATANAMEMAP } from './enum'
 /**
  * 时间复杂度:O(N) * O(log26^N)

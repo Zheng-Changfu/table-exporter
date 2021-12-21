@@ -2,10 +2,10 @@ import {
   mapCreateMergeHeaderTable,
   mapCreateCombinTable,
   mapCreateTable,
-} from '../table-helpers/helpers'
-import { STableExporter } from '../excel-download'
-import { createArray, isFunction, isObject, isNumber, hasOwnProperty, isArray, warn, flatTree } from "../excel-download/util"
-import { defaultColumnStyle, defaultThRowStyle } from '../excel-download/excel-style'
+} from './helpers'
+import { STableExporter } from '../s-table-exporter'
+import { createArray, isFunction, isObject, isNumber, hasOwnProperty, isArray, warn, flatTree } from "../util"
+import { defaultColumnStyle, defaultThRowStyle } from '../excel-style'
 
 export class ElMapExportTable {
   constructor(configData = {}, options = {}) {

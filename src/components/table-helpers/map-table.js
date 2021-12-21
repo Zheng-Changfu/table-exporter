@@ -1,4 +1,4 @@
-import { eachTree, noop, isFunction, isObject, hasOwnProperty, isEmptyObj, isArray } from '../excel-download/util'
+import { eachTree, noop, isFunction, isObject, hasOwnProperty, isEmptyObj, isArray } from '../util'
 // 预留
 const hooks = [
   'beforeMapCreateColumn', // 创建列之前被调用
