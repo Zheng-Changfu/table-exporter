@@ -1,5 +1,6 @@
 // 虚拟表格导出excel
 import ExcelJS from 'exceljs'
+import fileSaver from 'file-saver';
 import { getImageSuffix, isArray, isObject, noop, warn, isEmptyObj } from './util'
 import { STYLEMAP, TYPE2DATANAMEMAP } from './enum'
 /**
@@ -363,7 +364,6 @@ export class STableExporter {
   // 下载excel
   async download (fileName) {
     this.setProgress(71)
-    let fileSaver = await import("file-saver");
     const workbook = this.workbook
     const buffer = await workbook.xlsx.writeBuffer()
     const blob = new Blob([buffer], {

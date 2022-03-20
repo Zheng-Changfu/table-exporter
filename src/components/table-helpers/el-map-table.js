@@ -4,14 +4,13 @@ import {
   mapCreateTable,
 } from './helpers'
 import { STableExporter } from '../s-table-exporter'
-import { createArray, isFunction, isObject, isNumber, hasOwnProperty, isArray, warn, flatTree } from "../util"
+import { createArray, isFunction, isObject, isNumber, hasOwnProperty, isArray, warn, flatTree, getValueByObj } from "../util"
 import { defaultColumnStyle, defaultThRowStyle } from '../excel-style'
 
 export class ElMapExportTable {
   constructor(configData = {}, options = {}) {
     this.tables = []
     this.progress = options.progress
-    this.spanMethod = isFunction(configData.spanMethod) ? configData.spanMethod : undefined
     this.indentSize = options.indentSize || 1
     this.calculate(configData)
   }
@@ -52,6 +51,7 @@ export class ElMapExportTable {
   handleExcelHeader (config) {
     const {
       column = [],
+      dataIndex = 'dataIndex',
       columnKey: field = 'title',
       childrenKey = 'children',
       ...rest
@@ -74,8 +74,13 @@ export class ElMapExportTable {
         const cellStyle = this.setCellStyle(rest.setCellStyle, { data, columnIndex, rowIndex, type: 'header' })
         const imageStyle = this.setImageStyle(rest.setImageStyle, { data, columnIndex, rowIndex, type: 'header' })
         const cellFormat = this.setCellFormat(rest.setCellFormat, { data, columnIndex, rowIndex, type: 'header' })
-        if (hasOwnProperty(data, 'dataIndex')) {
-          const columnKey = data.dataIndex
+        if (
+          hasOwnProperty(data, dataIndex) &&
+          hasOwnProperty(data, '$leafNode') &&
+          data['$leafNode'] === true
+        ) {
+          // 表头分组中过滤掉开发者传的非末级节点dataIndex
+          const columnKey = data[dataIndex]
           columnKeys.push(columnKey)
         }
         return {
@@ -115,12 +120,12 @@ export class ElMapExportTable {
       childrenKey = 'children',
       treeNode = false, // 是否为树形结构
       treeField = columnKeys[0], // 哪一列为树形结构，默认第一列
+      spanMethod,
       ...rest
     } = config
     let result = null
     const indentSize = this.indentSize
-    const spanMethod = this.spanMethod
-    const isCombin = spanMethod && isFunction(spanMethod)
+    const isCombin = isFunction(spanMethod)
     if (isCombin) {
       // 组合
       const {
@@ -143,7 +148,7 @@ export class ElMapExportTable {
         },
         mapCreateData: ({ row, column, rowIndex, columnIndex }) => {
           const key = `${columnIndex}-field`
-          const value = row[column]
+          const value = getValueByObj(row, column)
           const rowStyle = this.setRowStyle(rest.setRowStyle, { data: row, columnIndex, rowIndex, type: 'main' }, false)
           const cellStyle = this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
           const imageStyle = this.setImageStyle(rest.setImageStyle, { data: row, columnIndex, rowIndex, type: 'main' })
@@ -206,7 +211,7 @@ export class ElMapExportTable {
         },
         mapCreateData: ({ row, column, rowIndex, columnIndex }) => {
           const key = `${columnIndex}-field`
-          const value = row[column]
+          const value = getValueByObj(row, column)
           const rowStyle = this.setRowStyle(rest.setRowStyle, { data: row, columnIndex, rowIndex, type: 'main' }, false)
           const cellStyle = this.setCellStyle(rest.setCellStyle, { data: row, columnIndex, rowIndex, type: 'main' })
           const imageStyle = this.setImageStyle(rest.setImageStyle, { data: row, columnIndex, rowIndex, type: 'main' })

@@ -32,7 +32,7 @@ import { ElMapExportTable } from "table-excel";
 
 > 正常按表格格式书写 **column 和 data, dataIndex 为对应数据源的字段**
 >
-> 注意：**column 中的 key 默认为 title，可通过 columnKey 设置**
+> 注意：**column 中的 key 默认为 title，可通过 columnKey 设置**，**dataIndex 中的 key 默认为 dataIndex, 可通过 dataIndex 设置**
 
 ```js
 # code
@@ -83,7 +83,7 @@ const data = [
 
 > 表头的合并，将对应的**列设置成相应的树形结构**
 >
-> 注意：**树形结构默认的孩子字段为 children,可通过 childrenKey 设置**
+> 注意：**树形结构默认的孩子字段为 children,可通过 childrenKey 设置**,**非末级节点传递的 dataIndex 会被过滤掉，无需外界额外处理**
 
 ```js
 # code
@@ -933,11 +933,12 @@ instance.download("导出大数据量表格到Excel");
 
 ### column 属性
 
-| 参数      | 说明                                                 | 类型   | 默认值 |
-| --------- | ---------------------------------------------------- | ------ | ------ |
-| title     | 对应的 Excel 列名,可通过 **columnKey 设置**          | any    | -      |
-| dataIndex | Excel 列对应的数据源字段                             | string | ''     |
-| children  | Excel 表头分组嵌套列配置,可通过 **childrenKey 设置** | array  | -      |
+| 参数      | 说明                                                         | 类型               | 默认值    |
+| --------- | ------------------------------------------------------------ | ------------------ | --------- |
+| title     | 对应的 Excel 列名,可通过 **columnKey 设置**                  | any                | -         |
+| dataIndex | Excel 列对应的数据源字段,默认为 **dataIndex**,可通过 **dataIndex 指定其他字段** | string             | dataIndex |
+| dataIndex | 支持通过 **数组查询嵌套路径(['a','b','c'])** 或 **a.b.c 查询嵌套路径** | string \| string[] | ''        |
+| children  | Excel 表头分组嵌套列配置,可通过 **childrenKey 设置**         | array              | -         |
 
 ### data 属性
 

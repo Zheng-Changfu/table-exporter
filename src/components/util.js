@@ -79,6 +79,26 @@ export const getObjectLen = obj => Object.keys(obj).length
 
 export const getImageSuffix = url => (url.match(/data:image\/(.*);base64/) || [])[1]
 
-export const hasWorkerByBrower = () => isFunction(window.Worker)
-
+export const getValueByObj = (obj, key) => {
+  // 支持a.b.c取值
+  // 支持[a,b,c]取值
+  let newKey = ''
+  let curr = obj
+  if (isArray(key)) {
+    // [a,b,c]形式
+    newKey = key
+  } else if (isString(key) && key.match(/\./) !== null) {
+    // a.b.c形式
+    newKey = key.split('.')
+  } else {
+    // 其他形式
+    newKey = [key]
+  }
+  for (let i = 0; i < newKey.length; i++) {
+    const k = newKey[i]
+    if (curr[k] === undefined) return ''
+    curr = curr[k]
+  }
+  return curr
+}
 
