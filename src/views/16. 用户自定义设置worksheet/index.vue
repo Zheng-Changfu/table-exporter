@@ -31,7 +31,8 @@
 </template>
 
 <script>
-import { ElMapExportTable } from "table-excel";
+import { ElMapExportTable, ExcelJS } from "table-excel";
+
 export default {
   name: "ExportTable17",
   data() {
@@ -81,6 +82,7 @@ export default {
           };
         },
         setWorkSheet: async ({ worksheet, sheetIndex }) => {
+          console.log(worksheet, sheetIndex);
           // 工作表保护
           await worksheet.protect("12345");
         },

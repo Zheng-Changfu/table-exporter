@@ -1,2 +1,3 @@
+import Exceljs from 'exceljs'
 export * from './table-helpers/el-map-table'
-export * as Exceljs from 'exceljs'
+export const ExcelJS = Exceljs
