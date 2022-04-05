@@ -1,7 +1,7 @@
 // 虚拟表格导出excel
 import ExcelJS from 'exceljs'
 import fileSaver from 'file-saver';
-import { getImageSuffix, isArray, isObject, noop, warn, isEmptyObj } from './util'
+import { getImageSuffix, isArray, isObject, isFunction, noop, warn, isEmptyObj } from './util'
 import { STYLEMAP, TYPE2DATANAMEMAP } from './enum'
 /**
  * 时间复杂度:O(N) * O(log26^N)
@@ -93,8 +93,18 @@ export class STableExporter {
     for (let i = 0; i < tableLen; i++) {
       const worksheet = workSheets[i]
       const table = tables[i]
+      const sheetIndex = i
       this.totalOffset = 1 // 表格从0开始,excel从1开始
       await this.handleCells(worksheet, table)
+      this.handleCursomSheet(worksheet, table, sheetIndex)
+    }
+  }
+
+  // 自定义处理sheet
+  handleCursomSheet (worksheet, table, sheetIndex) {
+    const sheetCallback = table.sheetCallback
+    if (isFunction(sheetCallback)) {
+      sheetCallback({ worksheet, sheetIndex })
     }
   }
 

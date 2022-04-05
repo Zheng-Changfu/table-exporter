@@ -22,6 +22,7 @@ export class ElMapExportTable {
     for (let i = 0; i < configLen; i++) {
       const config = configData[i]
       const sheetName = config.sheetName
+      const sheetCallback = config.setWorkSheet
       const insertHeaderData = this.handleInsertExcelHeader(config.setInsertHeader, i)
       const headerData = this.handleExcelHeader(config)
       const mainData = this.handleExcelMain(config, headerData.columnKeys)
@@ -33,6 +34,7 @@ export class ElMapExportTable {
         mainData,
         footerData,
         sheetName,
+        sheetCallback,
         options,
       }
       console.log(table, 'table')
