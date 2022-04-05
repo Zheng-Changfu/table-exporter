@@ -31,8 +31,7 @@
 </template>
 
 <script>
-// import { ElMapExportTable } from "table-excel";
-import { ElMapExportTable } from "../../components/index";
+import { ElMapExportTable } from "table-excel";
 export default {
   name: "ExportTable17",
   data() {
